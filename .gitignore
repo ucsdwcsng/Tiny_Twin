@@ -1,0 +1,30 @@
+# vim swp
+openairinterface5g/*.swp
+
+# log and exec file
+penairinterface5g/cmake_targets/log/
+penairinterface5g/cmake_targets/*/build/
+penairinterface5g/cmake_targets/ran_build/
+penairinterface5g/cmake_targets/nas_sim_tools/build/
+penairinterface5g/log/
+penairinterface5g/lte_build_oai/
+penairinterface5g/channel/
+penairinterface5g/logs/
+
+# IDE files
+penairinterface5g/.vscode
+penairinterface5g/.cproject
+penairinterface5g/.project
+penairinterface5g/.settings
+
+# Tags for vim/global
+GPATH
+GRTAGS
+GTAGS
+tags
+
+# others
+nfapi_nr_interface_scf
+*.log
+*.out
+CMakeUserPresets.json
