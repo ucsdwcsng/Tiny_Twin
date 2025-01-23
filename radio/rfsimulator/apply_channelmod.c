@@ -43,42 +43,11 @@ extern FILE *fplog;
 
 // void conv(const c16_t *input_sig,
 //                 c16_t *after_channel_sig,
-//                 int taplen,
-//                 int nbTx,
-//                 int TS,
-//                 int samp_size,
-//                 float *channelTapsi,
-//                 float *channelTapsr){
+//                 int nsamp,
+//                 float *mchannelModel){
 
-//   for (int i=0; i<samp_size; i++) {
-   
-//     struct complex16 *out_ptr=after_channel_sig+i;
-//     struct complexd rx_tmp= {0};
-
-//     for (int txAnt=0; txAnt < nbTx; txAnt++) {
-//       // const struct complexd *channelModel= channelDesc->ch[rxAnt+(txAnt*channelDesc->nb_rx)];
-//       // SET CHANNEL //
-//       //printf("cannel_lenght %d\n",(int)channelDesc->channel_length);
-//       for (int l = 0; l<taplen; l++) {
-//         // let's assume TS+i >= l
-//         // fixme: the rfsimulator current structure is interleaved antennas
-//         // this has been designed to not have to wait a full block transmission
-//         // but it is not very usefull
-//         // it would be better to split out each antenna in a separate flow
-//         // that will allow to mix ru antennas freely
-//         // (X + cirSize) % cirSize to ensure that index is positive
-//         const int idx = ((TS + i - l - dd) * nbTx + txAnt + samp_size) % samp_size;
-//         const struct complex16 tx16 = input_sig[idx];
-//         // rx_tmp.r += tx16.r * channelModel[l].r - tx16.i * channelModel[l].i;
-//         // rx_tmp.i += tx16.i * channelModel[l].r + tx16.r * channelModel[l].i;
-//         rx_tmp.r += tx16.r * channelTapsr[l] - tx16.i * channelTapsi[l];
-//         rx_tmp.i += tx16.i * channelTapsr[l] + tx16.r * channelTapsi[l];
-//         //printf("Read line: %f", mchannelModelr);
-//         //printf("Loop l=%d, txAnt=%d, rxAnt=%d\n", l, txAnt, rxAnt);
-//         //printf("  tx16 (real: %d, imag: %d), channelModel[%d] (real: %f, imag: %f)\n", tx16.r, tx16.i, l, channelModel[l].r, channelModel[l].i);
-//     } //l
-//   }
 // }
+
 /*
   Legacy study:
   The parameters are:
@@ -225,30 +194,18 @@ void rxAddInput(const c16_t *input_sig,
   // struct timespec start, end; // Structs to store time
   // clock_gettime(CLOCK_REALTIME, &start); // Log start time
 
-  // CONV FX //
-  // #pragma omp parallel{
-  //   conv(input_sig, after_channel_sig, mylen, nbTx, TS, nbSamples, mchannelModeli, mchannelModelr);
-  // }
-
   // if (fplog != NULL) {
   //       fprintf(fplog, "Function started at: %ld.%09ld seconds\n", start.tv_sec, start.tv_nsec);
   //       fflush(fplog); // Ensure it's written to the file immediately
   // }
 
   for (int i=0; i<nbSamples; i++) {
-    struct timespec start; // Structs to store time
-    clock_gettime(CLOCK_REALTIME, &start); // Log start time
-
-  if (fplog != NULL) {
-        fprintf(fplog, "Function started at: %ld.%09ld seconds\n", start.tv_sec, start.tv_nsec);
-        fflush(fplog); // Ensure it's written to the file immediately
-  }
    
     struct complex16 *out_ptr=after_channel_sig+i;
     struct complexd rx_tmp= {0};
 
     for (int txAnt=0; txAnt < nbTx; txAnt++) {
-      // const struct complexd *channelModel= channelDesc->ch[rxAnt+(txAnt*channelDesc->nb_rx)];
+      const struct complexd *channelModel= channelDesc->ch[rxAnt+(txAnt*channelDesc->nb_rx)];
       //printf("cannel_lenght %d\n",(int)channelDesc->channel_length);
 
   //   // if (fplog != NULL) {
@@ -294,13 +251,13 @@ void rxAddInput(const c16_t *input_sig,
       rx_tmp.i = cimag(out);
       channelDesc->Doppler_phase_cur[rxAnt] += channelDesc->Doppler_phase_inc;
     }
+
     out_ptr->r = lround(rx_tmp.r*pathLossLinear + noise_per_sample*gaussZiggurat(0.0,1.0));
     out_ptr->i = lround(rx_tmp.i*pathLossLinear + noise_per_sample*gaussZiggurat(0.0,1.0));
     out_ptr++;
   }
 
   // clock_gettime(CLOCK_REALTIME, &end); // Log end time
-
     // Log end to file
     // if (fplog != NULL) {
     //     fprintf(fplog, "Function finished at: %ld.%09ld seconds\n", end.tv_sec, end.tv_nsec);

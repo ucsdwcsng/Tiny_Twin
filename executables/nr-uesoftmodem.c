@@ -259,13 +259,11 @@ void set_options(int CC_id, PHY_VARS_NR_UE *UE){
 
 void init_openair0()
 {
-  fpr = fopen("/home/wcsng/openairinterface5g/channel/real_random_highsnr_20tap.txt", "r");
-  fpi = fopen("/home/wcsng/openairinterface5g/channel/real_random_highsnr_20tap.txt", "r");
-  // fpi = fopen("/home/wcsng/openairinterface5g/channel/imag_sionna_50taps.txt", "r");
-  // fpr = fopen("/home/wcsng/openairinterface5g/channel/imag_sionna_50taps.txt", "r");
-  fplog = fopen("/home/wcsng/openairinterface5g/logs/log.txt", "w");
-  fplog2 = fopen("/home/wcsng/openairinterface5g/logs/tti.txt", "w");
-  fplog3 = fopen("/home/wcsng/openairinterface5g/logs/log_dl.txt", "w");
+  fpr = fopen("/home/wcsng/tinytwin-oai/channel/real_random_10tap.txt", "r");
+  fpi = fopen("/home/wcsng/tinytwin-oai/channel/real_random_10tap.txt", "r");
+  fplog = fopen("/home/wcsng/tinytwin-oai/logs/log.txt", "w");
+  fplog2 = fopen("/home/wcsng/tinytwin-oai/logs/tti.txt", "w");
+  fplog3 = fopen("/home/wcsng/tinytwin-oai/logs/log_dl.txt", "w");
 
   int card;
   int freq_off = 0;
@@ -597,4 +595,3 @@ int main(int argc, char **argv)
   free(pckg);
   return 0;
 }
-
