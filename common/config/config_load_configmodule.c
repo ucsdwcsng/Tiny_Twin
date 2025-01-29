@@ -46,6 +46,9 @@
 #include "nfapi/oai_integration/vendor_ext.h"
 #include "config_common.h"
 
+extern int taplen;
+int taplen;
+
 // clang-format off
 static char  config_helpstr [] = "\n lte-softmodem -O [config mode]<:dbgl[debugflags]><:incp[path]>\n \
           debugflags can also be defined in the config section of the config file\n \
@@ -234,6 +237,7 @@ configmodule_interface_t *load_configmodule(int argc,
   uint32_t tmpflags=0;
   int i;
   int OoptIdx=-1;
+  int TapsIdx=-1;
   int OWoptIdx = -1;
 
   printf("CMDLINE: ");
@@ -241,7 +245,7 @@ configmodule_interface_t *load_configmodule(int argc,
     printf("\"%s\" ", argv[i]);
   printf("\n");
 
-  /* first parse the command line to look for the -O option */
+  /* first parse the command line to look for the -O and -T option */
   for (i = 0; i<argc; i++) {
     if (strlen(argv[i]) < 2)
     	continue;
@@ -249,6 +253,11 @@ configmodule_interface_t *load_configmodule(int argc,
     if ( argv[i][1] == 'O' && i < (argc -1)) {
       cfgparam = argv[i+1];
       OoptIdx=i;
+    }
+
+    if (argv[i][1] == 'T' && i < (argc - 1)) {
+        taplen = atoi(argv[i + 1]);
+        TapsIdx = i;
     }
 
     char *OWopt = strstr(argv[i], "OW");
@@ -322,6 +331,12 @@ configmodule_interface_t *load_configmodule(int argc,
     if (OoptIdx >= 0) {
       cfgptr->argv_info[OoptIdx] |= CONFIG_CMDLINEOPT_PROCESSED;
       cfgptr->argv_info[OoptIdx+1] |= CONFIG_CMDLINEOPT_PROCESSED;
+    }
+
+  // when TapsIdx is >0, -T option has been detected at position TapsIdx
+    if (TapsIdx >= 0) {
+      cfgptr->argv_info[TapsIdx] |= CONFIG_CMDLINEOPT_PROCESSED;
+      cfgptr->argv_info[TapsIdx+1] |= CONFIG_CMDLINEOPT_PROCESSED;
     }
 
     cfgptr->rtflags = cfgptr->rtflags | tmpflags;

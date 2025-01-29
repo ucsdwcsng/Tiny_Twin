@@ -96,4 +96,5 @@ Your email should contain below information:
 - Known/open issues are present on [GitLab](https://gitlab.eurecom.fr/oai/openairinterface5g/-/issues), so keep checking.
 
 Always remember a structured email will help us understand your issues quickly.
+
 # tinytwin-oai

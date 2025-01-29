@@ -21,6 +21,8 @@
 
 
 #define _GNU_SOURCE             /* See feature_test_macros(7) */
+#define _ARRAY_SIZE (80 * 1024 * 1024 / sizeof(long long unsigned int))
+
 #include <sched.h>
 #include <stdbool.h>
 #include <signal.h>
@@ -95,13 +97,21 @@ extern FILE *fpi;
 extern FILE *fplog; 
 extern FILE *fplog2;
 extern FILE *fplog3;
+// extern FILE *fplog4;
 extern int counterr;
+extern long long unsigned int timing_array[_ARRAY_SIZE];
+extern int timing_array_index;
+
 int counterr=0;
 FILE *fpr;
 FILE *fpi;
 FILE *fplog;
 FILE *fplog2;
 FILE *fplog3;
+// FILE *fplog4;
+long long unsigned int timing_array[_ARRAY_SIZE];
+int timing_array_index;
+
 extern const char *duplex_mode[];
 THREAD_STRUCT thread_struct;
 nrUE_params_t nrUE_params = {0};
@@ -259,11 +269,13 @@ void set_options(int CC_id, PHY_VARS_NR_UE *UE){
 
 void init_openair0()
 {
-  fpr = fopen("/home/wcsng/tinytwin-oai/channel/real_random_10tap.txt", "r");
-  fpi = fopen("/home/wcsng/tinytwin-oai/channel/real_random_10tap.txt", "r");
-  fplog = fopen("/home/wcsng/tinytwin-oai/logs/log.txt", "w");
-  fplog2 = fopen("/home/wcsng/tinytwin-oai/logs/tti.txt", "w");
-  fplog3 = fopen("/home/wcsng/tinytwin-oai/logs/log_dl.txt", "w");
+  fpr = fopen("../../../channel/real_random_10tap.txt", "r");
+  fpi = fopen("../../../channel/real_random_10tap.txt", "r");
+  fplog = fopen("../../../logs/timing_ue.txt", "w");
+  fplog2 = fopen("../../../logs/tti.txt", "w");
+  fplog3 = fopen("../../../logs/log_dl.txt", "w");
+  // fplog4 = fopen("/home/wcsng/tinytwin-oai/logs/new.txt", "w");
+  timing_array_index = 0;
 
   int card;
   int freq_off = 0;
@@ -591,6 +603,7 @@ int main(int argc, char **argv)
   fclose(fplog);
   fclose(fplog2);
   fclose(fplog3);
+  // fclose(fplog4);
 
   free(pckg);
   return 0;

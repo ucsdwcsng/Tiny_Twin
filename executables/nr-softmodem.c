@@ -21,6 +21,8 @@
 
 
 #define _GNU_SOURCE             /* See feature_test_macros(7) */
+#define _ARRAY_SIZE (80 * 1024 * 1024 / sizeof(long long unsigned int))
+
 #include <sched.h>
 
 
@@ -94,11 +96,18 @@ extern FILE *fpi;
 extern FILE *fpr;
 extern FILE *fplog;
 extern FILE *fplog3;
+// extern FILE *fplog4;
+extern long long unsigned int timing_array[_ARRAY_SIZE];
+extern int timing_array_index;
+
 FILE *fplog2;
 FILE *fpi;
 FILE *fpr;
 FILE *fplog;
 FILE *fplog3;
+// FILE *fplog4;
+long long unsigned int timing_array[_ARRAY_SIZE];
+int timing_array_index;
 
 pthread_cond_t nfapi_sync_cond;
 pthread_mutex_t nfapi_sync_mutex;
@@ -602,9 +611,14 @@ int main( int argc, char **argv ) {
   fpi = fopen("/home/wcsng/tinytwin-oai/channel/real_random_10tap.txt", "r");
   // fpi = fopen("/home/wcsng/openairinterface5g/channel/imag_sionna_50taps.txt", "r");
   // fpr = fopen("/home/wcsng/openairinterface5g/channel/imag_sionna_50taps.txt", "r");
-  fplog = fopen("/home/wcsng/tinytwin-oai/logs/log.txt", "w");
+  fplog = fopen("/home/wcsng/tinytwin-oai/logs/timing_gnb.txt", "w");
   fplog2 = fopen("/home/wcsng/tinytwin-oai/logs/tti.txt", "w");
   fplog3 = fopen("/home/wcsng/tinytwin-oai/logs/log_dl.txt", "w");
+  // fplog4 = fopen("/home/wcsng/tinytwin-oai/logs/new_dl.txt", "w");
+  timing_array_index = 0;
+
+  // load all data within the file real_random_10tap.txt into RAM and provide the pointer to the first element
+
   ///static configuration for NR at the moment
   if ((uniqCfg = load_configmodule(argc, argv, CONFIG_ENABLECMDLINEONLY)) == NULL) {
     exit_fun("[SOFTMODEM] Error, configuration module init failed\n");
@@ -784,6 +798,12 @@ int main( int argc, char **argv ) {
   oai_exit=1;
   printf("oai_exit=%d\n",oai_exit);
 
+  // flush all content of timing_array to the file pointed to by fplog
+  for(int itt = 0; itt < _ARRAY_SIZE; itt++) {
+    fprintf(fplog, "%llu\n", timing_array[itt]);
+  }
+  fflush(fplog);
+
   // cleanup
   if (RC.nb_nr_L1_inst > 0)
     stop_gNB(RC.nb_nr_L1_inst);
@@ -821,6 +841,7 @@ int main( int argc, char **argv ) {
   fclose(fplog);
   fclose(fpr);
   fclose(fplog3);
+  // fclose(fplog4);
 
   printf("Bye.\n");
   return 0;
