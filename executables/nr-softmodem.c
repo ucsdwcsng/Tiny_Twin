@@ -607,13 +607,11 @@ int main( int argc, char **argv ) {
   int ru_id, CC_id = 0;
   start_background_system();
 
-  fpr = fopen("/home/wcsng/tinytwin-oai/channel/real_random_10tap.txt", "r");
-  fpi = fopen("/home/wcsng/tinytwin-oai/channel/real_random_10tap.txt", "r");
-  // fpi = fopen("/home/wcsng/openairinterface5g/channel/imag_sionna_50taps.txt", "r");
-  // fpr = fopen("/home/wcsng/openairinterface5g/channel/imag_sionna_50taps.txt", "r");
-  fplog = fopen("/home/wcsng/tinytwin-oai/logs/timing_gnb.txt", "w");
-  fplog2 = fopen("/home/wcsng/tinytwin-oai/logs/tti.txt", "w");
-  fplog3 = fopen("/home/wcsng/tinytwin-oai/logs/log_dl.txt", "w");
+  fpr = fopen("../../../channel/real_random_10tap.txt", "r");
+  fpi = fopen("../../../channel/real_random_10tap.txt", "r");
+  fplog = fopen("../../../logs/timing_ue.txt", "w");
+  fplog2 = fopen("../../../logs/tti.txt", "w");
+  fplog3 = fopen("../../../logs/log_dl.txt", "w");
   // fplog4 = fopen("/home/wcsng/tinytwin-oai/logs/new_dl.txt", "w");
   timing_array_index = 0;
 

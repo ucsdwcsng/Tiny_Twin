@@ -20,7 +20,7 @@
 * For more information about the OpenAirInterface (OAI) Software Alliance:
 *      contact@openairinterface.org
 */
-
+#define _ARRAY_SIZE (80 * 1024 * 1024 / sizeof(long long unsigned int))
 
 #include <time.h>
 #include <stdio.h>
@@ -31,9 +31,13 @@
 //////
 #include <stdio.h>
 #include <omp.h>
+
+extern long long unsigned int timing_array[_ARRAY_SIZE];
+extern int timing_array_index;
 extern FILE *fpr;
 extern FILE *fpi;
-extern FILE *fplog; 
+// extern FILE *fplog4; 
+extern int taplen;
 //extern int counterr;
  //int counter=0;
 //  FILE *fpr;
@@ -158,18 +162,27 @@ void rxAddInput(const c16_t *input_sig,
   const uint64_t dd = channelDesc->channel_offset;
   const int nbTx=channelDesc->nb_tx;
    // counterr++;
-  int mylen=10;
+  // int mylen=1;
     float mchannelModelr[10]={0.1, 0, 0, 0, 1, 0, 0, 0, 0, 0.1};
     float mchannelModeli[10]={0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
       //printf("hiii\n");
     
+    struct timespec start, end; // Structs to store time
+    long long unsigned int diff; // Variable to store time difference
+    clock_gettime(CLOCK_REALTIME, &start); // Log start time
+
+    // if (fplog4 != NULL) {
+    //   fprintf(fplog4, "%d\n", taplen);
+    //   fflush(fplog4); // Ensure it's written to the file immediately
+    // }
+
     if (fgets(strr, sizeof(strr), fpr) != NULL) {
       // Read successful, process the line in strr
       //printf("Read line: %s", strr);
       char *token1 = strtok(strr, " ");
       int idx1 = 0;
 
-      while (token1 != NULL && idx1 < mylen) {
+      while (token1 != NULL && idx1 < taplen) {
           mchannelModelr[idx1] = atof(token1);
           //printf("%f\n",mchannelModelr[idx1]);
           token1 = strtok(NULL, " ");
@@ -184,14 +197,28 @@ void rxAddInput(const c16_t *input_sig,
       char *token2 = strtok(stri, " ");
       int idx2 = 0;
 
-      while (token2 != NULL && idx2 < mylen) {
+      while (token2 != NULL && idx2 < taplen) {
           mchannelModeli[idx2] = atof(token2);
           token2 = strtok(NULL, " ");
           idx2++;
       }
     }
 
-  // struct timespec start, end; // Structs to store time
+    // clock_gettime(CLOCK_REALTIME, &start); // Log start time
+    // const struct complexd *channelModel= channelDesc->ch[rxAnt+(txAnt*channelDesc->nb_rx)];
+    clock_gettime(CLOCK_REALTIME, &end); // Log end time
+
+    // diff = (end.tv_sec - start.tv_sec) * 1e9 + (end.tv_nsec - start.tv_nsec);
+    // diff.tv_nsec = end.tv_nsec - start.tv_nsec;
+    // append to the end of timing_array which has a fixed size, so if the array is full do not add
+    diff = (end.tv_sec - start.tv_sec) * 1e9 + (end.tv_nsec - start.tv_nsec);
+    if (timing_array_index < _ARRAY_SIZE) {
+      timing_array[timing_array_index] = diff;
+      timing_array_index = timing_array_index + 1;  
+    }
+
+  // struct timespec start, end, diff; // Structs to store time
+  // long long unsigned int diff; // Variable to store time difference
   // clock_gettime(CLOCK_REALTIME, &start); // Log start time
 
   // if (fplog != NULL) {
@@ -205,8 +232,19 @@ void rxAddInput(const c16_t *input_sig,
     struct complexd rx_tmp= {0};
 
     for (int txAnt=0; txAnt < nbTx; txAnt++) {
-      const struct complexd *channelModel= channelDesc->ch[rxAnt+(txAnt*channelDesc->nb_rx)];
-      //printf("cannel_lenght %d\n",(int)channelDesc->channel_length);
+      // clock_gettime(CLOCK_REALTIME, &start); // Log start time
+      // const struct complexd *channelModel= channelDesc->ch[rxAnt+(txAnt*channelDesc->nb_rx)];
+      // clock_gettime(CLOCK_REALTIME, &end); // Log end time
+
+      // // diff = (end.tv_sec - start.tv_sec) * 1e9 + (end.tv_nsec - start.tv_nsec);
+      // // diff.tv_nsec = end.tv_nsec - start.tv_nsec;
+      // // append to the end of timing_array which has a fixed size, so if the array is full do not add
+      // if (timing_array_index < _ARRAY_SIZE) {
+      //   timing_array[timing_array_index] = (end.tv_nsec - start.tv_nsec);
+      //   timing_array_index = timing_array_index + 1;  
+      // }
+
+// append to the end of global array timing_array
 
   //   // if (fplog != NULL) {
   //   //   for (int i = 0; i <(int)channelDesc->channel_length; i++) {
@@ -219,7 +257,7 @@ void rxAddInput(const c16_t *input_sig,
 
       //const struct complex *channelModelEnd=channelModel+channelDesc->channel_length;
       //for (int l = 0; l<(int)channelDesc->channel_length; l++) {
-      for (int l = 0; l<mylen; l++) {
+      for (int l = 0; l<taplen; l++) {
         // let's assume TS+i >= l
         // fixme: the rfsimulator current structure is interleaved antennas
         // this has been designed to not have to wait a full block transmission
@@ -277,4 +315,3 @@ void rxAddInput(const c16_t *input_sig,
   
 
 }
-
