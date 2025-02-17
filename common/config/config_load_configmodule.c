@@ -46,8 +46,16 @@
 #include "nfapi/oai_integration/vendor_ext.h"
 #include "config_common.h"
 
+// my variables //
 extern int taplen;
+extern int snrlog;
+extern int cqilog;
+extern int tptlog;
+
 int taplen;
+int snrlog = 0;
+int cqilog = 0;
+int tptlog = 0;
 
 // clang-format off
 static char  config_helpstr [] = "\n lte-softmodem -O [config mode]<:dbgl[debugflags]><:incp[path]>\n \
@@ -237,7 +245,12 @@ configmodule_interface_t *load_configmodule(int argc,
   uint32_t tmpflags=0;
   int i;
   int OoptIdx=-1;
+
+  // my variables //
   int TapsIdx=-1;
+  int SNRIdx=-1;
+  int CQIIdx=-1;
+  int TPTIdx=-1;
   int OWoptIdx = -1;
 
   printf("CMDLINE: ");
@@ -258,6 +271,21 @@ configmodule_interface_t *load_configmodule(int argc,
     if (argv[i][1] == 'T' && i < (argc - 1)) {
         taplen = atoi(argv[i + 1]);
         TapsIdx = i;
+    }
+
+    if (argv[i][1] == 'S' && i < (argc - 1)) {
+        snrlog = atoi(argv[i + 1]);
+        SNRIdx = i;
+    }
+
+    if (argv[i][1] == 'Q' && i < (argc - 1)) {
+        cqilog = atoi(argv[i + 1]);
+        CQIIdx = i;
+    }
+
+    if (argv[i][1] == 'P' && i < (argc - 1)) {
+        tptlog = atoi(argv[i + 1]);
+        TPTIdx = i;
     }
 
     char *OWopt = strstr(argv[i], "OW");
@@ -338,6 +366,22 @@ configmodule_interface_t *load_configmodule(int argc,
       cfgptr->argv_info[TapsIdx] |= CONFIG_CMDLINEOPT_PROCESSED;
       cfgptr->argv_info[TapsIdx+1] |= CONFIG_CMDLINEOPT_PROCESSED;
     }
+
+  // when TapsIdx is >0, -T option has been detected at position TapsIdx
+    if (SNRIdx >= 0) {
+      cfgptr->argv_info[SNRIdx] |= CONFIG_CMDLINEOPT_PROCESSED;
+      cfgptr->argv_info[SNRIdx+1] |= CONFIG_CMDLINEOPT_PROCESSED;
+    }  
+
+    if (CQIIdx >= 0) {
+      cfgptr->argv_info[CQIIdx] |= CONFIG_CMDLINEOPT_PROCESSED;
+      cfgptr->argv_info[CQIIdx+1] |= CONFIG_CMDLINEOPT_PROCESSED;
+    }  
+
+    if (TPTIdx >= 0) {
+      cfgptr->argv_info[TPTIdx] |= CONFIG_CMDLINEOPT_PROCESSED;
+      cfgptr->argv_info[TPTIdx+1] |= CONFIG_CMDLINEOPT_PROCESSED;
+    }  
 
     cfgptr->rtflags = cfgptr->rtflags | tmpflags;
     cfgptr->argc   = argc;

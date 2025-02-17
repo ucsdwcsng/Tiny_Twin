@@ -52,9 +52,25 @@
 #define HALFWORD 16
 #define WORD 32
 //#define SIZE_OF_POINTER sizeof (void *)
+#define _INT_ARRAY_SIZE (3 * 80 * 1024 * 1024 / sizeof(int))
+#define _HEXA_ARRAY_SIZE (80 * 1024 * 1024 / sizeof(unsigned int))
+#define _FLOAT_ARRAY_SIZE (80 * 1024 * 1024 / sizeof(float))
 
 extern FILE *fplog2;
-// FILE *fplog2;
+extern FILE *fpsnr;
+// extern FILE *fpcqi;
+extern FILE *fpdltpt;
+
+extern int snrlog;
+// extern int cqilog;
+extern int tptlog;
+
+extern int int_array[_INT_ARRAY_SIZE];
+extern int int_array_index;
+extern float float_array[_FLOAT_ARRAY_SIZE];
+extern int float_array_index;
+extern unsigned int hexa_array[_HEXA_ARRAY_SIZE];
+extern int hexa_array_index;
 
 int get_dl_tda(const gNB_MAC_INST *nrmac, const NR_ServingCellConfigCommon_t *scc, int slot) {
 
@@ -649,6 +665,23 @@ static void pf_dl(module_id_t module_id,
     const uint32_t b = UE->mac_stats.dl.current_bytes;
     UE->dl_thr_ue = (1 - a) * UE->dl_thr_ue + a * b;
 
+    // log SNR //
+    if (snrlog){
+      if (sched_ctrl != NULL) {
+        fprintf(fpsnr, "UL SNR: %f\n", (float)(sched_ctrl->pusch_snrx10 / 10.0));  
+      }
+    }
+
+    // log CQI //
+    // if (cqilog){
+    //     fprintf(fpcqi, "DL CQI: %d\n", sched_ctrl->CSI_report.cri_ri_li_pmi_cqi_report.wb_cqi_2tb);  
+    // }
+
+    // // log UL TPT // //
+    if (tptlog){
+        fprintf(fpdltpt, "DL TPT: %f\n", UE->dl_thr_ue);  
+    }
+
     if (remainUEs == 0)
       continue;
 
@@ -705,6 +738,7 @@ static void pf_dl(module_id_t module_id,
                                     0 /* N_PRB_oh, 0 for initialBWP */,
                                     0 /* tb_scaling */,
                                     sched_pdsch->nrOfLayers) >> 3;
+
       float coeff_ue = (float) tbs / UE->dl_thr_ue;
       LOG_D(NR_MAC, "[UE %04x][%4d.%2d] b %d, thr_ue %f, tbs %d, coeff_ue %f\n",
             UE->rnti,
@@ -723,15 +757,6 @@ static void pf_dl(module_id_t module_id,
 
   qsort(UE_sched, sizeofArray(UE_sched), sizeof(UEsched_t), comparator);
   UEsched_t *iterator = UE_sched;
-
-  // [log TTI timings]
-  struct timespec start; // Structs to store time
-  clock_gettime(CLOCK_REALTIME, &start); // Log start time
-
-  if (fplog2 != NULL) {
-        fprintf(fplog2, "Function started at: %ld.%09ld seconds\n", start.tv_sec, start.tv_nsec);
-        fflush(fplog2); // Ensure it's written to the file immediately
-  }
 
   const int min_rbSize = 5;
 

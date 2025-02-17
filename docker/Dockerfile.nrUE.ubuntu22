@@ -126,7 +126,7 @@ RUN /bin/bash -c "ln -s /usr/local/lib/liboai_usrpdevif.so /usr/local/lib/liboai
 WORKDIR /opt/oai-nr-ue
 COPY --from=nr-ue-base /tini /tini
 #CMD ["tail -f /dev/null"]
-ENTRYPOINT ["tail","-f","/dev/null"]
+#ENTRYPOINT ["tail","-f","/dev/null"]
 
-#CMD ["/opt/oai-nr-ue/bin/nr-uesoftmodem"]
-#ENTRYPOINT ["/tini", "-v", "--", "/opt/oai-nr-ue/bin/entrypoint.sh"]
+CMD ["/opt/oai-nr-ue/bin/nr-uesoftmodem"]
+ENTRYPOINT ["/tini", "-v", "--", "/opt/oai-nr-ue/bin/entrypoint.sh"]

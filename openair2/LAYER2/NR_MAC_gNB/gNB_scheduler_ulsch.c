@@ -39,6 +39,8 @@
 #include "LAYER2/RLC/rlc.h"
 
 //#define SRS_IND_DEBUG
+extern int tptlog;
+extern FILE *fpultpt;
 
 static rnti_t lcid_crnti_lookahead(uint8_t *pdu, uint32_t pdu_len)
 {
@@ -1815,6 +1817,11 @@ static void pf_ul(module_id_t module_id,
     const float a = 0.01f;
     const uint32_t b = stats->current_bytes;
     UE->ul_thr_ue = (1 - a) * UE->ul_thr_ue + a * b;
+
+  // // log UL TPT // //
+  if (tptlog){
+      fprintf(fpultpt, "UL TPT: %f\n", UE->ul_thr_ue);  
+  }
 
     if(remainUEs == 0)
       continue;

@@ -212,10 +212,10 @@ void rxAddInput(const c16_t *input_sig,
     // diff.tv_nsec = end.tv_nsec - start.tv_nsec;
     // append to the end of timing_array which has a fixed size, so if the array is full do not add
     diff = (end.tv_sec - start.tv_sec) * 1e9 + (end.tv_nsec - start.tv_nsec);
-    if (timing_array_index < _ARRAY_SIZE) {
-      timing_array[timing_array_index] = diff;
-      timing_array_index = timing_array_index + 1;  
-    }
+    // if (timing_array_index < _ARRAY_SIZE) {
+    //   timing_array[timing_array_index] = diff;
+    //   timing_array_index = timing_array_index + 1;  
+    // }
 
   // struct timespec start, end, diff; // Structs to store time
   // long long unsigned int diff; // Variable to store time difference

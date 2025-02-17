@@ -98,6 +98,7 @@ extern FILE *fplog;
 extern FILE *fplog2;
 extern FILE *fplog3;
 // extern FILE *fplog4;
+
 extern int counterr;
 extern long long unsigned int timing_array[_ARRAY_SIZE];
 extern int timing_array_index;
@@ -269,13 +270,27 @@ void set_options(int CC_id, PHY_VARS_NR_UE *UE){
 
 void init_openair0()
 {
+  // METAL VERSIONS //
   fpr = fopen("../../../channel/real_random_10tap.txt", "r");
   fpi = fopen("../../../channel/real_random_10tap.txt", "r");
-  fplog = fopen("../../../logs/timing_ue.txt", "w");
-  fplog2 = fopen("../../../logs/tti.txt", "w");
-  fplog3 = fopen("../../../logs/log_dl.txt", "w");
-  // fplog4 = fopen("/home/wcsng/tinytwin-oai/logs/new.txt", "w");
-  timing_array_index = 0;
+
+  // fplog = fopen("../../../logs/timing.txt", "w"); // file the data from the timing array is written to
+  // fplog2 = fopen("../../../logs/mac.txt", "w"); // when did a TTI start
+  // fplog3 = fopen("../../../logs/log_dl.txt", "w"); // MAC log
+  // fplog4 = fopen("../../../logs/new_dl.txt", "w"); // ensured taplen worked
+  // fplog5 = fopen("../../../logs/mac.txt", "w"); // file the MAC data is written to
+
+  // // DOCKER VERSIONS //
+  // fpr = fopen("../etc/channel/real_random_10tap.txt", "r");
+  // fpi = fopen("../etc/channel/real_random_10tap.txt", "r");
+
+  // fplog = fopen("../etc/logs/timing.txt", "w"); // file the data from the timing array is written to
+  // fplog2 = fopen("../etc/logs/mac.txt", "w"); // when did a TTI start
+  // fplog3 = fopen("../etc/logs/log_dl.txt", "w"); // MAC logs
+  // // fplog4 = fopen("/home/wcsng/tinytwin-oai/logs/new_dl.txt", "w"); // ensured taplen worked
+  // // fplog5 = fopen("../etc/logs/mac.txt", "w"); // file the MAC data is written to
+
+  timing_array_index = 0; // for extremely fine logging (ns granularity)
 
   int card;
   int freq_off = 0;
@@ -288,15 +303,6 @@ void init_openair0()
     uint64_t dl_carrier, ul_carrier;
     openair0_cfg[card].configFilename    = NULL;
     openair0_cfg[card].threequarter_fs   = frame_parms->threequarter_fs;
-    openair0_cfg[card].sample_rate       = frame_parms->samples_per_subframe * 1e3;
-    openair0_cfg[card].samples_per_frame = frame_parms->samples_per_frame;
-
-    if (frame_parms->frame_type==TDD)
-      openair0_cfg[card].duplex_mode = duplex_mode_TDD;
-    else
-      openair0_cfg[card].duplex_mode = duplex_mode_FDD;
-
-    openair0_cfg[card].Mod_id = 0;
     openair0_cfg[card].num_rb_dl = frame_parms->N_RB_DL;
     openair0_cfg[card].clock_source = get_softmodem_params()->clock_source;
     openair0_cfg[card].time_source = get_softmodem_params()->timing_source;
@@ -588,6 +594,12 @@ int main(int argc, char **argv)
   oai_exit=1;
   printf("oai_exit=%d\n",oai_exit);
 
+  // // flush all content of timing_array to the file pointed to by fplog
+  // for(int itt = 0; itt < _ARRAY_SIZE; itt++) {
+  //   fprintf(fplog, "%llu\n", timing_array[itt]);
+  // }
+  // fflush(fplog);
+
   if (ouput_vcd)
     vcd_signal_dumper_close();
 
@@ -600,10 +612,11 @@ int main(int argc, char **argv)
   }
   fclose(fpr);
   fclose(fpi);
-  fclose(fplog);
-  fclose(fplog2);
-  fclose(fplog3);
+  // fclose(fplog);
+  // fclose(fplog2);
+  // fclose(fplog3);
   // fclose(fplog4);
+  // fclose(fplog5);
 
   free(pckg);
   return 0;

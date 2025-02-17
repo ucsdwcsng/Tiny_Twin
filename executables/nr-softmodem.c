@@ -22,9 +22,11 @@
 
 #define _GNU_SOURCE             /* See feature_test_macros(7) */
 #define _ARRAY_SIZE (80 * 1024 * 1024 / sizeof(long long unsigned int))
+#define _INT_ARRAY_SIZE (3 * 80 * 1024 * 1024 / sizeof(int))
+#define _HEXA_ARRAY_SIZE (80 * 1024 * 1024 / sizeof(unsigned int))
+#define _FLOAT_ARRAY_SIZE (80 * 1024 * 1024 / sizeof(float))
 
 #include <sched.h>
-
 
 #include "T.h"
 
@@ -96,18 +98,40 @@ extern FILE *fpi;
 extern FILE *fpr;
 extern FILE *fplog;
 extern FILE *fplog3;
-// extern FILE *fplog4;
+extern FILE *fplog4;
+extern FILE *fpsnr;
+extern FILE *fpcqi;
+extern FILE *fpultpt;
+extern FILE *fpdltpt;
+
 extern long long unsigned int timing_array[_ARRAY_SIZE];
 extern int timing_array_index;
+extern int int_array[_INT_ARRAY_SIZE];
+extern int int_array_index;
+extern unsigned int hexa_array[_HEXA_ARRAY_SIZE];
+extern int hexa_array_index;
+extern float float_array[_FLOAT_ARRAY_SIZE];
+extern int float_array_index;
 
 FILE *fplog2;
 FILE *fpi;
 FILE *fpr;
 FILE *fplog;
 FILE *fplog3;
-// FILE *fplog4;
+FILE *fplog4;
+FILE *fpsnr;
+FILE *fpcqi;
+FILE *fpultpt;
+FILE *fpdltpt;
+
 long long unsigned int timing_array[_ARRAY_SIZE];
 int timing_array_index;
+int int_array[_INT_ARRAY_SIZE];
+int int_array_index;
+unsigned int hexa_array[_HEXA_ARRAY_SIZE];
+int hexa_array_index;
+float float_array[_FLOAT_ARRAY_SIZE];
+int float_array_index;
 
 pthread_cond_t nfapi_sync_cond;
 pthread_mutex_t nfapi_sync_mutex;
@@ -607,13 +631,33 @@ int main( int argc, char **argv ) {
   int ru_id, CC_id = 0;
   start_background_system();
 
+  // METAL VERSIONS //
   fpr = fopen("../../../channel/real_random_10tap.txt", "r");
   fpi = fopen("../../../channel/real_random_10tap.txt", "r");
-  fplog = fopen("../../../logs/timing_ue.txt", "w");
-  fplog2 = fopen("../../../logs/tti.txt", "w");
-  fplog3 = fopen("../../../logs/log_dl.txt", "w");
-  // fplog4 = fopen("/home/wcsng/tinytwin-oai/logs/new_dl.txt", "w");
-  timing_array_index = 0;
+
+  // fplog = fopen("../../../logs/timing.txt", "w"); // file the data from the timing array is written to
+  // fplog2 = fopen("../../../logs/mac.txt", "w"); // when did a TTI start 
+  // fplog3 = fopen("../../../logs/tpt.txt", "w"); // MAC log - DL TPT
+  // fplog4 = fopen("../../../logs/rnti.txt", "w"); // ensured taplen worked (or) RNTI of UE
+  fpsnr = fopen("../../../logs/snr.txt", "w"); // file the SNR is written to
+  fpcqi = fopen("../../../logs/cqi.txt", "w"); // file the CQI is written to
+  fpultpt = fopen("../../../logs/ul_tpt.txt", "w"); // file the throughputs received are written to
+  fpdltpt = fopen("../../../logs/dl_tpt.txt", "w"); // file the throughputs received are written to
+
+  // // DOCKER VERSIONS //
+  // fpr = fopen("../etc/channel/real_random_10tap.txt", "r");
+  // fpi = fopen("../etc/channel/real_random_10tap.txt", "r");
+
+  // fplog = fopen("../etc/logs/timing.txt", "w"); // file the data from the timing array is written to
+  // fplog2 = fopen("../etc/logs/mac.txt", "w"); // when did a TTI start
+  // fplog3 = fopen("../etc/logs/log_dl.txt", "w"); // MAC logs
+  // // fplog4 = fopen("/home/wcsng/tinytwin-oai/logs/new_dl.txt", "w"); // ensured taplen worked
+  // // fplog5 = fopen("../etc/logs/mac.txt", "w"); // file the MAC data is written to
+
+  timing_array_index = 0; // for extremely fin logging (ns granularity)
+  float_array_index = 0;
+  int_array_index = 0;
+  hexa_array_index = 0;
 
   // load all data within the file real_random_10tap.txt into RAM and provide the pointer to the first element
 
@@ -800,7 +844,24 @@ int main( int argc, char **argv ) {
   for(int itt = 0; itt < _ARRAY_SIZE; itt++) {
     fprintf(fplog, "%llu\n", timing_array[itt]);
   }
-  fflush(fplog);
+  fflush(fplog);\
+
+  // for(int itt2 = 0; itt2 < _FLOAT_ARRAY_SIZE; itt2++) {
+  //   fprintf(fplog3, "%f\n", float_array[itt2]);
+  // }
+  // fflush(fplog3);
+
+  // for(int itt2 = 0; itt2 < _HEXA_ARRAY_SIZE; itt2++) {
+  //   fprintf(fplog4, "%04x\n", hexa_array[itt2]);
+  // }
+  // fflush(fplog4);
+
+  // for(int itt2 = 0; itt2 < _INT_ARRAY_SIZE; itt2=itt2+1) {
+  //   fprintf(fplog5, "%d\n", int_array[itt2]);
+  //   // fprintf(fplog5, "%d\n", int_array[itt2+1]);
+  //   // fprintf(fplog5, "%d\n", int_array[itt2+2]);
+  // }
+  // fflush(fplog5);
 
   // cleanup
   if (RC.nb_nr_L1_inst > 0)
@@ -834,12 +895,16 @@ int main( int argc, char **argv ) {
   free(pckg);
   logClean();
 
-  fclose(fplog2);
+  //fclose(fplog2);
   fclose(fpi);
   fclose(fplog);
   fclose(fpr);
-  fclose(fplog3);
+  // fclose(fplog3);
   // fclose(fplog4);
+  fclose(fpsnr);
+  fclose(fpcqi);
+  fclose(fpultpt);
+  fclose(fpdltpt);
 
   printf("Bye.\n");
   return 0;

@@ -116,7 +116,7 @@ typedef enum { SIMU_ROLE_SERVER = 1, SIMU_ROLE_CLIENT } simuRole;
     {"wait_timeout",           "<wait timeout if no UE connected>\n", simOpt,  .iptr=&(rfsimulator->wait_timeout),     .defintval=1,                     TYPE_INT,       0 },\
   };
 
-extern FILE *fplog3;
+//extern FILE *fplog3;
 static void getset_currentchannels_type(char *buf, int debug, webdatadef_t *tdata, telnet_printfunc_t prnt);
 extern int get_currentchannels_type(char *buf, int debug, webdatadef_t *tdata, telnet_printfunc_t prnt); // in random_channel.c
 static int rfsimu_setchanmod_cmd(char *buff, int debug, telnet_printfunc_t prnt, void *arg);
@@ -909,18 +909,18 @@ static int rfsimulator_read(openair0_device *device, openair0_timestamp *ptimest
 
   // [what all information is stored within openair0_device]
   // [what is log_d]
-  if (fplog3 != NULL) {
-        fprintf(fplog3, "Sample Size: %d \n", nsamps);
+  // if (fplog3 != NULL) {
+  //       fprintf(fplog3, "Sample Size: %d \n", nsamps);
 
-        // Log openair0_device fields
-        fprintf(fplog3, "MOD ID: %d \n", device->Mod_id);
-        fprintf(fplog3, "Host Type: %d \n", device->host_type);
-        fprintf(fplog3, "Device Type: %.d \n", device->type);
-        fprintf(fplog3, "Remote Address: %s \n", device->openair0_cfg->remote_addr);
-        fprintf(fplog3, "Remote Port: %d \n", device->openair0_cfg->remote_port);
+  //       // Log openair0_device fields
+  //       fprintf(fplog3, "MOD ID: %d \n", device->Mod_id);
+  //       fprintf(fplog3, "Host Type: %d \n", device->host_type);
+  //       fprintf(fplog3, "Device Type: %.d \n", device->type);
+  //       fprintf(fplog3, "Remote Address: %s \n", device->openair0_cfg->remote_addr);
+  //       fprintf(fplog3, "Remote Port: %d \n", device->openair0_cfg->remote_port);
 
-        fflush(fplog3); // Ensure it's written to the file immediately
-  }
+  //       fflush(fplog3); // Ensure it's written to the file immediately
+  // }
 
   rfsimulator_state_t *t = device->priv;
   LOG_D(HW, "Enter rfsimulator_read, expect %d samples, will release at TS: %ld, nbAnt %d\n", nsamps, t->nextRxTstamp+nsamps, nbAnt);
