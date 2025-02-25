@@ -4,10 +4,12 @@
 
 ## Logging MAC and PHY level metrics
 
+To log any of the below quantities, follow any of the flags below by any non-zero number.
+
 TTI level logging:
-- `-S`: Log UL SNR 
-- `-Q`: Log DL CQI 
-- `-P`: Log cumulative gNB throughput in  UL and DL both
-- `-X`: Logs whether MAC level ReTransmissions (UL and DL) occur in a given TTI. Also logs the MCS of the transmission across a given TTI.
+- `-S`: Log SNR and RSRP
+- `-Q`: Log CQIs
+- `-P`: Log cumulative gNB throughput in  UL and DL both. ALso logs whether MAC ReTxs occur in a given TTI.
+- `-X`: Logs the MCS of the transmission across a given TTI.
 
 Will move to the config file soon.

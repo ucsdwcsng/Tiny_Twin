@@ -39,8 +39,8 @@
 #include "RRC/NR/MESSAGES/asn1_msg.h"
 #include "openair1/PHY/TOOLS/phy_scope_interface.h"
 
-// extern int cqilog;
-// extern FILE *fpcqi;
+extern int cqilog;
+extern FILE *fpcqi;
 
 /*
  *  NR SLOT PROCESSING SEQUENCE
@@ -309,11 +309,9 @@ static void *NRUE_phy_stub_standalone_pnf_task(void *arg)
     if (pthread_mutex_lock(&mac->mutex_dl_info)) abort();
 
     // // log CQI // //
-    // if (cqilog){
-    //   if (ch_info){
-    //     fprintf(fpcqi, "DL CQI: %d\n", ch_info->csi[0].cqi);  
-    //   }
-    // }
+    if (cqilog){
+      fprintf(fpcqi, "DL CQI: %d\n", ch_info->csi[0].cqi);  
+    }
 
     if (ch_info) {
       mac->nr_ue_emul_l1.pmi = ch_info->csi[0].pmi;

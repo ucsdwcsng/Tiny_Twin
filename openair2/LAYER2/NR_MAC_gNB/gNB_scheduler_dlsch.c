@@ -60,10 +60,12 @@ extern FILE *fplog2;
 extern FILE *fpsnr;
 // extern FILE *fpcqi;
 extern FILE *fpdltpt;
+extern FILE *fpdlmcs;
 
 extern int snrlog;
 // extern int cqilog;
 extern int tptlog;
+extern int mcslog;
 
 extern int int_array[_INT_ARRAY_SIZE];
 extern int int_array_index;
@@ -668,7 +670,8 @@ static void pf_dl(module_id_t module_id,
     // log SNR //
     if (snrlog){
       if (sched_ctrl != NULL) {
-        fprintf(fpsnr, "UL SNR: %f\n", (float)(sched_ctrl->pusch_snrx10 / 10.0));  
+        fprintf(fpsnr, "UL SNR: %f\n", (float)(sched_ctrl->pusch_snrx10 / 10.0)); 
+        fprintf(fpsnr, "UL ReTx: %d\n", sched_pdsch->dl_harq_pid);
       }
     }
 
@@ -677,9 +680,10 @@ static void pf_dl(module_id_t module_id,
     //     fprintf(fpcqi, "DL CQI: %d\n", sched_ctrl->CSI_report.cri_ri_li_pmi_cqi_report.wb_cqi_2tb);  
     // }
 
-    // // log UL TPT // //
+    // // log DL TPT // //
     if (tptlog){
         fprintf(fpdltpt, "DL TPT: %f\n", UE->dl_thr_ue);  
+        fprintf(fpdltpt, "DL MAC-ReTx: %d\n", sched_pdsch->dl_harq_pid);
     }
 
     if (remainUEs == 0)
@@ -725,6 +729,13 @@ static void pf_dl(module_id_t module_id,
         sched_ctrl->dl_bler_stats.mcs = sched_pdsch->mcs;
       } else
         sched_pdsch->mcs = get_mcs_from_bler(bo, stats, &sched_ctrl->dl_bler_stats, max_mcs, frame);
+
+      // // log DL MCS // //
+      if (mcslog){
+        fprintf(fpdlmcs, "DL MCS: %d\n", sched_ctrl->dl_bler_stats.mcs);  
+        fprintf(fpdlmcs, "DL BLER_LB : %f\n", sched_ctrl->dl_bler_stats.bler);  
+      }
+
       sched_pdsch->nrOfLayers = get_dl_nrOfLayers(sched_ctrl, current_BWP->dci_format);
       sched_pdsch->pm_index =
           get_pm_index(mac, UE, current_BWP->dci_format, sched_pdsch->nrOfLayers, mac->radio_config.pdsch_AntennaPorts.XP);

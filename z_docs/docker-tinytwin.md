@@ -41,7 +41,7 @@ Go to the `tinytwin-oai/sims/siso` folder and bring up the services defined in t
 ### Bring Up the Core Network
 
 ```
-sudo docker compose up -d mysql oai-amf oai-smf oai-spgwu oai-ext-dn oai-upf
+sudo docker compose up -d mysql oai-amf oai-smf oai-ext-dn oai-upf
 ```
 
 ### Bring Up the nrUE

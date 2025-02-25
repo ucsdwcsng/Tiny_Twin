@@ -94,6 +94,8 @@ unsigned short config_frames[4] = {2,9,11,13};
 
 extern FILE *fpr;
 extern FILE *fpi;
+extern FILE *fprsrp;
+extern FILE *fpcqi;
 extern FILE *fplog; 
 extern FILE *fplog2;
 extern FILE *fplog3;
@@ -102,10 +104,13 @@ extern FILE *fplog3;
 extern int counterr;
 extern long long unsigned int timing_array[_ARRAY_SIZE];
 extern int timing_array_index;
+extern int snrlog;
 
 int counterr=0;
 FILE *fpr;
 FILE *fpi;
+FILE *fpcqi;
+FILE *fprsrp;
 FILE *fplog;
 FILE *fplog2;
 FILE *fplog3;
@@ -271,8 +276,18 @@ void set_options(int CC_id, PHY_VARS_NR_UE *UE){
 void init_openair0()
 {
   // METAL VERSIONS //
-  fpr = fopen("../../../channel/real_random_10tap.txt", "r");
-  fpi = fopen("../../../channel/real_random_10tap.txt", "r");
+  // fpr = fopen("../../../channel/real_random_10tap.txt", "r");
+  // fpi = fopen("../../../channel/real_random_10tap.txt", "r");
+
+  fpr = fopen("../../../channel/channel_varying.txt", "r");
+  fpi = fopen("../../../channel/channel_varying.txt", "r");
+
+  // if (snrlog){
+    // fpsnr = fopen("../../../logs/snr.txt", "w"); // file the SNR is written to
+  fprsrp = fopen("../../../logs/rsrp.txt", "w");
+  // }
+
+  fpcqi = fopen("../../../logs/dl_cqi.txt", "w"); // file the CQI is written to
 
   // fplog = fopen("../../../logs/timing.txt", "w"); // file the data from the timing array is written to
   // fplog2 = fopen("../../../logs/mac.txt", "w"); // when did a TTI start
@@ -612,6 +627,8 @@ int main(int argc, char **argv)
   }
   fclose(fpr);
   fclose(fpi);
+  fclose(fprsrp);
+  fclose(fpcqi);
   // fclose(fplog);
   // fclose(fplog2);
   // fclose(fplog3);

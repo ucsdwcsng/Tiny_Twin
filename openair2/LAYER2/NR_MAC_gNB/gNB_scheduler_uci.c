@@ -800,9 +800,9 @@ static void evaluate_cqi_report(uint8_t *payload,
   sched_ctrl->CSI_report.cri_ri_li_pmi_cqi_report.wb_cqi_1tb = temp_cqi;
 
   // log CQI //
-  if (cqilog){
-      fprintf(fpcqi, "now\n");  
-  }
+  // if (cqilog){
+  //     fprintf(fpcqi, "now\n");  
+  // }
 
   LOG_D(MAC,"Wide-band CQI for the first TB %d\n", temp_cqi);
   if (cqi_bitlen > 4) {

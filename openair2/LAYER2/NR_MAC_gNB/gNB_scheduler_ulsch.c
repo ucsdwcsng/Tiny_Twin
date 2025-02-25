@@ -40,7 +40,11 @@
 
 //#define SRS_IND_DEBUG
 extern int tptlog;
+extern int mcslog;
 extern FILE *fpultpt;
+extern FILE *fpulmcs;
+extern FILE *fpcqi;
+extern int cqilog;
 
 static rnti_t lcid_crnti_lookahead(uint8_t *pdu, uint32_t pdu_len)
 {
@@ -728,6 +732,7 @@ static void _nr_rx_sdu(const module_id_t gnb_mod_idP,
 
     // if not missed detection (10dB threshold for now)
     if (rssi > 0) {
+      // how much transmitting power is allowed
       int txpower_calc = UE_scheduling_control->ul_harq_processes[harq_pid].sched_pusch.phr_txpower_calc;
       UE->mac_stats.deltaMCS = txpower_calc;
       UE->mac_stats.NPRB = UE_scheduling_control->ul_harq_processes[harq_pid].sched_pusch.rbSize;
@@ -739,7 +744,12 @@ static void _nr_rx_sdu(const module_id_t gnb_mod_idP,
       if (timing_advance != 0xffff)
         UE_scheduling_control->ta_update = timing_advance;
       UE_scheduling_control->raw_rssi = rssi;
+      // SNR depends on CQI //
       UE_scheduling_control->pusch_snrx10 = ul_cqi * 5 - 640 - (txpower_calc * 10);
+
+    if (cqilog){
+        fprintf(fpcqi, "UL CQI: %d\n", ul_cqi);  
+    }
 
       if (UE_scheduling_control->tpc0 > 1)
         LOG_D(NR_MAC,
@@ -874,6 +884,8 @@ static void _nr_rx_sdu(const module_id_t gnb_mod_idP,
 
       LOG_A(NR_MAC, "%4d.%2d PUSCH with TC_RNTI 0x%04x received correctly\n", frameP, slotP, current_rnti);
 
+
+
       NR_UE_sched_ctrl_t *UE_scheduling_control = &UE->UE_sched_ctrl;
       if (ul_cqi != 0xff) {
         UE_scheduling_control->tpc0 = nr_get_tpc(target_snrx10, ul_cqi, 30, UE_scheduling_control->sched_pusch.phr_txpower_calc);
@@ -994,6 +1006,7 @@ void nr_rx_sdu(const module_id_t gnb_mod_idP,
                const uint8_t ul_cqi,
                const uint16_t rssi)
 {
+  // uses a MUTEX lock to prevent multiple threads from modifying the same SDU //
   gNB_MAC_INST *gNB_mac = RC.nrmac[gnb_mod_idP];
   NR_SCHED_LOCK(&gNB_mac->sched_lock);
   _nr_rx_sdu(gnb_mod_idP, CC_idP, frameP, slotP, rntiP, sduP, sdu_lenP, harq_pid, timing_advance, ul_cqi, rssi);
@@ -1821,6 +1834,7 @@ static void pf_ul(module_id_t module_id,
   // // log UL TPT // //
   if (tptlog){
       fprintf(fpultpt, "UL TPT: %f\n", UE->ul_thr_ue);  
+      fprintf(fpultpt, "UL ReTx: %d\n", sched_ctrl->retrans_ul_harq.head);
   }
 
     if(remainUEs == 0)
@@ -1877,6 +1891,12 @@ static void pf_ul(module_id_t module_id,
       sched_pusch->mcs = get_mcs_from_bler(bo, stats, &sched_ctrl->ul_bler_stats, max_mcs, frame);
       LOG_D(NR_MAC,"%d.%d starting mcs %d bleri %f\n",frame,slot,sched_pusch->mcs,sched_ctrl->ul_bler_stats.bler);
     }
+
+    // // log UL MCS // //
+    if (mcslog){
+        fprintf(fpulmcs, "UL MCS: %d\n", sched_pusch->mcs);  
+    }
+
     /* Schedule UE on SR or UL inactivity and no data (otherwise, will be scheduled
      * based on data to transmit) */
     if (B == 0 && do_sched) {

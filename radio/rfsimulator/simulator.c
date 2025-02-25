@@ -927,6 +927,7 @@ static int rfsimulator_read(openair0_device *device, openair0_timestamp *ptimest
 
   // deliver data from received data
   // check if a UE is connected
+  // if not, generate void (0s) samples
   int first_sock;
   
   for (first_sock = 0; first_sock < MAX_FD_RFSIMU; first_sock++)
@@ -943,7 +944,8 @@ static int rfsimulator_read(openair0_device *device, openair0_timestamp *ptimest
         memset(samplesVoid[x],0,sampleToByte(nsamps,1));
 
       t->nextRxTstamp+=nsamps;
-
+      
+      // checked every 100 samples //
       if ( ((t->nextRxTstamp/nsamps)%100) == 0)
         LOG_D(HW, "No UE, Generating void samples for Rx: %ld\n", t->nextRxTstamp);
 
@@ -996,6 +998,8 @@ static int rfsimulator_read(openair0_device *device, openair0_timestamp *ptimest
       if (t->poll_telnetcmdq)
         t->poll_telnetcmdq(t->telnetcmd_qid,t);
       //printf("%d",nbAnt);
+      
+      // // MIMO should be handled here // //
       for (int a=0; a<nbAnt; a++) {//loop over number of Rx antennas
         if ( ptr->channel_model != NULL ) { // apply a channel model
           //printf("hiii");

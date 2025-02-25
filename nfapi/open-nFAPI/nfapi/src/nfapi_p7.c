@@ -43,6 +43,8 @@
 extern int nfapi_unpack_p7_vendor_extension(nfapi_p7_message_header_t *header, uint8_t **ppReadPackedMsg, void *user_data);
 extern int nfapi_pack_p7_vendor_extension(nfapi_p7_message_header_t *header, uint8_t **ppWritePackedMsg, void *user_data);
 
+extern FILE *fpcqi;
+
 uint32_t nfapi_calculate_checksum(uint8_t *buffer, uint16_t len) {
   uint32_t chksum = 0;
   // calcaulte upto the checksum
@@ -1139,6 +1141,7 @@ static uint8_t pack_ul_config_request_ulsch_pdu(nfapi_ul_config_ulsch_pdu *ulsch
            pack_tlv(NFAPI_UL_CONFIG_REQUEST_ULSCH_PDU_REL13_TAG, &ulsch_pdu->ulsch_pdu_rel13, ppWritePackedMsg, end, &pack_ul_config_request_ulsch_rel13_value));
 }
 
+// log this
 static uint8_t pack_ul_config_request_cqi_ri_rel8_value(void *tlv, uint8_t **ppWritePackedMsg, uint8_t *end) {
   nfapi_ul_config_cqi_ri_information_rel8_t *cqi_ri_info_rel8 = (nfapi_ul_config_cqi_ri_information_rel8_t *)tlv;
   return ( push8(cqi_ri_info_rel8->dl_cqi_pmi_size_rank_1, ppWritePackedMsg, end) &&
@@ -1146,6 +1149,8 @@ static uint8_t pack_ul_config_request_cqi_ri_rel8_value(void *tlv, uint8_t **ppW
            push8(cqi_ri_info_rel8->ri_size, ppWritePackedMsg, end) &&
            push8(cqi_ri_info_rel8->delta_offset_cqi, ppWritePackedMsg, end) &&
            push8(cqi_ri_info_rel8->delta_offset_ri, ppWritePackedMsg, end));
+
+   fprintf(fpcqi, "DL_CQI: %u", (unsigned int)cqi_ri_info_rel8->dl_cqi_pmi_size_rank_1);        
 }
 
 static uint8_t pack_ul_config_request_cqi_ri_rel9_value(void *tlv, uint8_t **ppWritePackedMsg, uint8_t *end) {
@@ -5061,6 +5066,8 @@ static uint8_t unpack_ul_config_ulsch_pdu_rel13_value(void *tlv, uint8_t **ppRea
           pull16(ppReadPackedMsg, &ulsch_pdu_rel13->initial_transmission_sf_io, end) &&
           pull8(ppReadPackedMsg,  &ulsch_pdu_rel13->empty_symbols_due_to_re_tunning, end));
 }
+
+// log this
 static uint8_t unpack_ul_config_cqi_ri_info_rel8_value(void *tlv, uint8_t **ppReadPackedMsg, uint8_t *end) {
   nfapi_ul_config_cqi_ri_information_rel8_t *cqi_ri_info_rel8 = (nfapi_ul_config_cqi_ri_information_rel8_t *)tlv;
   return (pull8(ppReadPackedMsg, &cqi_ri_info_rel8->dl_cqi_pmi_size_rank_1, end) &&
@@ -5068,8 +5075,11 @@ static uint8_t unpack_ul_config_cqi_ri_info_rel8_value(void *tlv, uint8_t **ppRe
           pull8(ppReadPackedMsg, &cqi_ri_info_rel8->ri_size, end) &&
           pull8(ppReadPackedMsg, &cqi_ri_info_rel8->delta_offset_cqi, end) &&
           pull8(ppReadPackedMsg, &cqi_ri_info_rel8->delta_offset_ri, end));
+
+
 }
 
+// log this
 static uint8_t unpack_ul_config_cqi_ri_info_rel9_value(void *tlv, uint8_t **ppReadPackedMsg, uint8_t *end) {
   nfapi_ul_config_cqi_ri_information_rel9_t *cqi_ri_info_rel9 = (nfapi_ul_config_cqi_ri_information_rel9_t *)tlv;
 

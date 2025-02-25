@@ -51,11 +51,13 @@ extern int taplen;
 extern int snrlog;
 extern int cqilog;
 extern int tptlog;
+extern int mcslog;
 
 int taplen;
 int snrlog = 0;
 int cqilog = 0;
 int tptlog = 0;
+int mcslog = 0;
 
 // clang-format off
 static char  config_helpstr [] = "\n lte-softmodem -O [config mode]<:dbgl[debugflags]><:incp[path]>\n \
@@ -251,6 +253,7 @@ configmodule_interface_t *load_configmodule(int argc,
   int SNRIdx=-1;
   int CQIIdx=-1;
   int TPTIdx=-1;
+  int MCSIdx=-1;
   int OWoptIdx = -1;
 
   printf("CMDLINE: ");
@@ -286,6 +289,11 @@ configmodule_interface_t *load_configmodule(int argc,
     if (argv[i][1] == 'P' && i < (argc - 1)) {
         tptlog = atoi(argv[i + 1]);
         TPTIdx = i;
+    }
+
+    if (argv[i][1] == 'X' && i < (argc - 1)) {
+        mcslog = atoi(argv[i + 1]);
+        MCSIdx = i;
     }
 
     char *OWopt = strstr(argv[i], "OW");
@@ -381,6 +389,11 @@ configmodule_interface_t *load_configmodule(int argc,
     if (TPTIdx >= 0) {
       cfgptr->argv_info[TPTIdx] |= CONFIG_CMDLINEOPT_PROCESSED;
       cfgptr->argv_info[TPTIdx+1] |= CONFIG_CMDLINEOPT_PROCESSED;
+    }  
+
+    if (MCSIdx >= 0) {
+      cfgptr->argv_info[MCSIdx] |= CONFIG_CMDLINEOPT_PROCESSED;
+      cfgptr->argv_info[MCSIdx+1] |= CONFIG_CMDLINEOPT_PROCESSED;
     }  
 
     cfgptr->rtflags = cfgptr->rtflags | tmpflags;

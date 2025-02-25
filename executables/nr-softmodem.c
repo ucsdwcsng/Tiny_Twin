@@ -100,9 +100,12 @@ extern FILE *fplog;
 extern FILE *fplog3;
 extern FILE *fplog4;
 extern FILE *fpsnr;
+extern FILE *fprsrp;
 extern FILE *fpcqi;
 extern FILE *fpultpt;
 extern FILE *fpdltpt;
+extern FILE *fpulmcs;
+extern FILE *fpdlmcs;
 
 extern long long unsigned int timing_array[_ARRAY_SIZE];
 extern int timing_array_index;
@@ -113,6 +116,11 @@ extern int hexa_array_index;
 extern float float_array[_FLOAT_ARRAY_SIZE];
 extern int float_array_index;
 
+extern int snrlog;
+extern int cqilog;
+extern int tptlog;
+extern int mcslog;
+
 FILE *fplog2;
 FILE *fpi;
 FILE *fpr;
@@ -120,9 +128,12 @@ FILE *fplog;
 FILE *fplog3;
 FILE *fplog4;
 FILE *fpsnr;
+FILE *fprsrp;
 FILE *fpcqi;
 FILE *fpultpt;
 FILE *fpdltpt;
+FILE *fpulmcs;
+FILE *fpdlmcs;
 
 long long unsigned int timing_array[_ARRAY_SIZE];
 int timing_array_index;
@@ -632,17 +643,25 @@ int main( int argc, char **argv ) {
   start_background_system();
 
   // METAL VERSIONS //
-  fpr = fopen("../../../channel/real_random_10tap.txt", "r");
-  fpi = fopen("../../../channel/real_random_10tap.txt", "r");
+  // fpr = fopen("../../../channel/real_random_10tap.txt", "r");
+  // fpi = fopen("../../../channel/real_random_10tap.txt", "r");
+
+  fpr = fopen("../../../channel/channel_varying.txt", "r");
+  fpi = fopen("../../../channel/channel_varying.txt", "r");
 
   // fplog = fopen("../../../logs/timing.txt", "w"); // file the data from the timing array is written to
   // fplog2 = fopen("../../../logs/mac.txt", "w"); // when did a TTI start 
   // fplog3 = fopen("../../../logs/tpt.txt", "w"); // MAC log - DL TPT
   // fplog4 = fopen("../../../logs/rnti.txt", "w"); // ensured taplen worked (or) RNTI of UE
   fpsnr = fopen("../../../logs/snr.txt", "w"); // file the SNR is written to
-  fpcqi = fopen("../../../logs/cqi.txt", "w"); // file the CQI is written to
+    // fprsrp = fopen("../../../logs/rsrp.txt", "w");
+  
+  fpcqi = fopen("../../../logs/ul_cqi.txt", "w"); // file the CQI is written to
   fpultpt = fopen("../../../logs/ul_tpt.txt", "w"); // file the throughputs received are written to
   fpdltpt = fopen("../../../logs/dl_tpt.txt", "w"); // file the throughputs received are written to
+
+  fpulmcs = fopen("../../../logs/ul_mcs.txt", "w"); // file the MCS values assigned are written to
+  fpdlmcs = fopen("../../../logs/dl_mcs.txt", "w"); // file the MCS values assigned are written to
 
   // // DOCKER VERSIONS //
   // fpr = fopen("../etc/channel/real_random_10tap.txt", "r");
@@ -902,9 +921,12 @@ int main( int argc, char **argv ) {
   // fclose(fplog3);
   // fclose(fplog4);
   fclose(fpsnr);
+  fclose(fprsrp);
   fclose(fpcqi);
   fclose(fpultpt);
   fclose(fpdltpt);
+  fclose(fpulmcs);
+  fclose(fpdlmcs);
 
   printf("Bye.\n");
   return 0;
