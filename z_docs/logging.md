@@ -16,66 +16,73 @@ Will move to the config file soon.
 
 ## Files Modified
 
-### UL SNR: `gnb_scheduler_dlsch.c:672`
-    ```
-    if (snrlog){
-        if (sched_ctrl != NULL) {
-            fprintf(fpsnr, "TTI Index: %d\n", tti_counter);
-            fprintf(fpsnr, "UL SNR: %f\n", (float)(sched_ctrl->pusch_snrx10 / 10.0)); 
-            fprintf(fpsnr, "UL ReTx: %d\n", sched_pdsch->dl_harq_pid);
-        }
-    }
-    ```
-
-### UL CQI: `gnb_scheduler_ulsch.c:753`
-    ```
-    if (cqilog){
+### UL SNR
+**File:** `gnb_scheduler_dlsch.c:672`
+```c
+if (snrlog) {
+    if (sched_ctrl != NULL) {
         fprintf(fpsnr, "TTI Index: %d\n", tti_counter);
-        fprintf(fpsnr, "UL CQI: %d\n", ul_cqi);  
+        fprintf(fpsnr, "UL SNR: %f\n", (float)(sched_ctrl->pusch_snrx10 / 10.0)); 
+        fprintf(fpsnr, "UL ReTx: %d\n", sched_pdsch->dl_harq_pid);
     }
-    ```    
+}
+```
 
-### UL TPT: `gnb_scheduler_ulsch.c:1839`
-    ```
-    if (tptlog){
-        fprintf(fpsnr, "TTI Index: %d\n", tti_counter);
-        fprintf(fpsnr, "UL TPT: %f\n", UE->ul_thr_ue);  
-        // fprintf(fpultpt, "UL ReTx: %d\n", sched_ctrl->retrans_ul_harq.head);
-    }
-    ```
+### UL CQI
+**File:** `gnb_scheduler_ulsch.c:753`
+```c
+if (cqilog) {
+    fprintf(fpsnr, "TTI Index: %d\n", tti_counter);
+    fprintf(fpsnr, "UL CQI: %d\n", ul_cqi);  
+}
+```
 
-### UL MCS: `gnb_scheduler_ulsch.c:1901`
-    ```
-    if (mcslog){
-        fprintf(fpsnr, "TTI Index: %d\n", tti_counter);
-        fprintf(fpsnr, "UL MCS: %d\n", sched_pusch->mcs);  
-    }
-    ```
+### UL Throughput
+**File:** `gnb_scheduler_ulsch.c:1839`
+```c
+if (tptlog) {
+    fprintf(fpsnr, "TTI Index: %d\n", tti_counter);
+    fprintf(fpsnr, "UL TPT: %f\n", UE->ul_thr_ue);  
+    // fprintf(fpultpt, "UL ReTx: %d\n", sched_ctrl->retrans_ul_harq.head);
+}
+```
 
-### DL RSRP: `csi_rx.c:258`
-    ```
-    if (snrlog){
-        fprintf(fprsrp, "TTI Count: %d\n", tti_counter);
-        fprintf(fprsrp, "RSRP: %i\n", *rsrp_dBm);  
-    }
-    ``` 
+### UL MCS
+**File:** `gnb_scheduler_ulsch.c:1901`
+```c
+if (mcslog) {
+    fprintf(fpsnr, "TTI Index: %d\n", tti_counter);
+    fprintf(fpsnr, "UL MCS: %d\n", sched_pusch->mcs);  
+}
+```
 
-### DL MCS: `gnb_scheduler_dlsch.c:737`
-    ```
-    if (mcslog){
+### DL RSRP
+**File:** `csi_rx.c:258`
+```c
+if (snrlog) {
+    fprintf(fprsrp, "TTI Count: %d\n", tti_counter);
+    fprintf(fprsrp, "RSRP: %i\n", *rsrp_dBm);  
+}
+```
+
+### DL MCS
+**File:** `gnb_scheduler_dlsch.c:737`
+```c
+if (mcslog) {
     fprintf(fprsrp, "TTI Count: %d\n", tti_counter);
     fprintf(fprsrp, "DL MCS: %d\n", sched_ctrl->dl_bler_stats.mcs);  
     fprintf(fprsrp, "DL BLER_LB : %f\n", sched_ctrl->dl_bler_stats.bler);  
-    }
-    ```  
+}
+```
 
-### DL TPT: `gnb_scheduler_dlsch.c:672`
-    ```
-    if (snrlog){
-        if (sched_ctrl != NULL) {
-            fprintf(fpsnr, "TTI Index: %d\n", tti_counter);
-            fprintf(fpsnr, "UL SNR: %f\n", (float)(sched_ctrl->pusch_snrx10 / 10.0)); 
-            fprintf(fpsnr, "UL ReTx: %d\n", sched_pdsch->dl_harq_pid);
-        }
-        }
-    ```           
+### DL Throughput
+**File:** `gnb_scheduler_dlsch.c:672`
+```c
+if (snrlog) {
+    if (sched_ctrl != NULL) {
+        fprintf(fpsnr, "TTI Index: %d\n", tti_counter);
+        fprintf(fpsnr, "UL SNR: %f\n", (float)(sched_ctrl->pusch_snrx10 / 10.0)); 
+        fprintf(fpsnr, "UL ReTx: %d\n", sched_pdsch->dl_harq_pid);
+    }
+}
+```
