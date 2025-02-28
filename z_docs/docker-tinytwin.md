@@ -55,3 +55,5 @@ sudo docker compose up -d oai-nr-ue
 ```
 sudo docker compose up -d oai-gnb
 ```
+
+### Run Traffic

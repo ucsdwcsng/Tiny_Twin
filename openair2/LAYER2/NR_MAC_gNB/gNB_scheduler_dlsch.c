@@ -61,11 +61,13 @@ extern FILE *fpsnr;
 // extern FILE *fpcqi;
 extern FILE *fpdltpt;
 extern FILE *fpdlmcs;
+extern FILE *fprsrp;
 
 extern int snrlog;
 // extern int cqilog;
 extern int tptlog;
 extern int mcslog;
+extern int tti_counter;
 
 extern int int_array[_INT_ARRAY_SIZE];
 extern int int_array_index;
@@ -670,6 +672,7 @@ static void pf_dl(module_id_t module_id,
     // log SNR //
     if (snrlog){
       if (sched_ctrl != NULL) {
+        fprintf(fpsnr, "TTI Index: %d\n", tti_counter);
         fprintf(fpsnr, "UL SNR: %f\n", (float)(sched_ctrl->pusch_snrx10 / 10.0)); 
         fprintf(fpsnr, "UL ReTx: %d\n", sched_pdsch->dl_harq_pid);
       }
@@ -682,8 +685,9 @@ static void pf_dl(module_id_t module_id,
 
     // // log DL TPT // //
     if (tptlog){
-        fprintf(fpdltpt, "DL TPT: %f\n", UE->dl_thr_ue);  
-        fprintf(fpdltpt, "DL MAC-ReTx: %d\n", sched_pdsch->dl_harq_pid);
+        fprintf(fprsrp, "TTI Count: %d\n", tti_counter);
+        fprintf(fprsrp, "DL TPT: %f\n", UE->dl_thr_ue);  
+        fprintf(fprsrp, "DL MAC-ReTx: %d\n", sched_pdsch->dl_harq_pid);
     }
 
     if (remainUEs == 0)
@@ -732,8 +736,9 @@ static void pf_dl(module_id_t module_id,
 
       // // log DL MCS // //
       if (mcslog){
-        fprintf(fpdlmcs, "DL MCS: %d\n", sched_ctrl->dl_bler_stats.mcs);  
-        fprintf(fpdlmcs, "DL BLER_LB : %f\n", sched_ctrl->dl_bler_stats.bler);  
+        fprintf(fprsrp, "TTI Count: %d\n", tti_counter);
+        fprintf(fprsrp, "DL MCS: %d\n", sched_ctrl->dl_bler_stats.mcs);  
+        fprintf(fprsrp, "DL BLER_LB : %f\n", sched_ctrl->dl_bler_stats.bler);  
       }
 
       sched_pdsch->nrOfLayers = get_dl_nrOfLayers(sched_ctrl, current_BWP->dci_format);
@@ -768,6 +773,9 @@ static void pf_dl(module_id_t module_id,
 
   qsort(UE_sched, sizeofArray(UE_sched), sizeof(UEsched_t), comparator);
   UEsched_t *iterator = UE_sched;
+
+  // // log TTI index // //
+  tti_counter = tti_counter + 1;
 
   const int min_rbSize = 5;
 

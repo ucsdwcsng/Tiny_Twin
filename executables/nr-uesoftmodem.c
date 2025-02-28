@@ -279,12 +279,12 @@ void init_openair0()
   // fpr = fopen("../../../channel/real_random_10tap.txt", "r");
   // fpi = fopen("../../../channel/real_random_10tap.txt", "r");
 
-  fpr = fopen("../../../channel/channel_varying.txt", "r");
-  fpi = fopen("../../../channel/channel_varying.txt", "r");
+  fpr = fopen("../../../channel/channel_clean.txt", "r");
+  fpi = fopen("../../../channel/channel_clean.txt", "r");
 
   // if (snrlog){
     // fpsnr = fopen("../../../logs/snr.txt", "w"); // file the SNR is written to
-  fprsrp = fopen("../../../logs/rsrp.txt", "w");
+  // fprsrp = fopen("../../../logs/rsrp.txt", "w");
   // }
 
   fpcqi = fopen("../../../logs/dl_cqi.txt", "w"); // file the CQI is written to

@@ -48,6 +48,7 @@
 
 extern FILE *fprsrp;
 extern int snrlog;
+extern int tti_counter;
 
 void nr_det_A_MF_2x2(int32_t *a_mf_00,
                      int32_t *a_mf_01,
@@ -254,8 +255,11 @@ static int nr_get_csi_rs_signal(const PHY_VARS_NR_UE *ue,
       - ((int)openair0_cfg[0].rx_gain[0] - (int)openair0_cfg[0].rx_gain_offset[0]) - dB_fixed(ue->frame_parms.ofdm_symbol_size);
   
   // actual one
-  // fprintf(fprsrp, "RSRP: %i\n", *rsrp_dBm);  
-  
+  // if (snrlog){
+  //   fprintf(fprsrp, "TTI Count: %d\n", tti_counter);
+  //   fprintf(fprsrp, "RSRP: %i\n", *rsrp_dBm);  
+  // }
+
 #ifdef NR_CSIRS_DEBUG
   LOG_I(NR_PHY, "RSRP = %i (%i dBm)\n", *rsrp, *rsrp_dBm);
 #endif

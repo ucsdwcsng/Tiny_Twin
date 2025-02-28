@@ -38,13 +38,16 @@
 #include "LAYER2/nr_rlc/nr_rlc_oai_api.h"
 #include "LAYER2/RLC/rlc.h"
 
-//#define SRS_IND_DEBUG
+// #define SRS_IND_DEBUG
+
 extern int tptlog;
 extern int mcslog;
 extern FILE *fpultpt;
+extern FILE *fpsnr;
 extern FILE *fpulmcs;
 extern FILE *fpcqi;
 extern int cqilog;
+extern int tti_counter;
 
 static rnti_t lcid_crnti_lookahead(uint8_t *pdu, uint32_t pdu_len)
 {
@@ -748,7 +751,8 @@ static void _nr_rx_sdu(const module_id_t gnb_mod_idP,
       UE_scheduling_control->pusch_snrx10 = ul_cqi * 5 - 640 - (txpower_calc * 10);
 
     if (cqilog){
-        fprintf(fpcqi, "UL CQI: %d\n", ul_cqi);  
+        fprintf(fpsnr, "TTI Index: %d\n", tti_counter);
+        fprintf(fpsnr, "UL CQI: %d\n", ul_cqi);  
     }
 
       if (UE_scheduling_control->tpc0 > 1)
@@ -1833,8 +1837,9 @@ static void pf_ul(module_id_t module_id,
 
   // // log UL TPT // //
   if (tptlog){
-      fprintf(fpultpt, "UL TPT: %f\n", UE->ul_thr_ue);  
-      fprintf(fpultpt, "UL ReTx: %d\n", sched_ctrl->retrans_ul_harq.head);
+      fprintf(fpsnr, "TTI Index: %d\n", tti_counter);
+      fprintf(fpsnr, "UL TPT: %f\n", UE->ul_thr_ue);  
+      // fprintf(fpultpt, "UL ReTx: %d\n", sched_ctrl->retrans_ul_harq.head);
   }
 
     if(remainUEs == 0)
@@ -1894,7 +1899,8 @@ static void pf_ul(module_id_t module_id,
 
     // // log UL MCS // //
     if (mcslog){
-        fprintf(fpulmcs, "UL MCS: %d\n", sched_pusch->mcs);  
+        fprintf(fpsnr, "TTI Index: %d\n", tti_counter);
+        fprintf(fpsnr, "UL MCS: %d\n", sched_pusch->mcs);  
     }
 
     /* Schedule UE on SR or UL inactivity and no data (otherwise, will be scheduled

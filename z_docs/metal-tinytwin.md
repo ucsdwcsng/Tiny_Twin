@@ -41,7 +41,7 @@ sudo ./nr-uesoftmodem --uicc0.imsi 001010000000001 -C 3619200000 -r 106 --numero
 ### Server
 
 ```
-iperf -s -u -B 10.0.0.2
+iperf -s -u -i 1 -B 10.0.0.2
 ```
 
 ### Client
@@ -49,6 +49,21 @@ iperf -s -u -B 10.0.0.2
 ```
 docker exec -it oai-ext-dn iperf -u -t 86400 -i 1 -fk -B 192.168.70.135 -b 20M -c 10.0.0.8
 ```
+
+## Run UL Traffic
+
+### Server
+
+```
+docker exec -it oai-ext-dn iperf -s -u -i 1 -B 192.168.70.135
+```
+
+### Client
+
+```
+iperf -u -t 86400 -i 1 -fk -c 192.168.70.135 -b 20M -B 10.0.0.8
+```
+
 
 <!-- ## Expected Output
 

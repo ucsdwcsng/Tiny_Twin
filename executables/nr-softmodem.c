@@ -120,6 +120,7 @@ extern int snrlog;
 extern int cqilog;
 extern int tptlog;
 extern int mcslog;
+extern int tti_counter;
 
 FILE *fplog2;
 FILE *fpi;
@@ -134,6 +135,7 @@ FILE *fpultpt;
 FILE *fpdltpt;
 FILE *fpulmcs;
 FILE *fpdlmcs;
+int tti_counter=0;
 
 long long unsigned int timing_array[_ARRAY_SIZE];
 int timing_array_index;
@@ -646,14 +648,15 @@ int main( int argc, char **argv ) {
   // fpr = fopen("../../../channel/real_random_10tap.txt", "r");
   // fpi = fopen("../../../channel/real_random_10tap.txt", "r");
 
-  fpr = fopen("../../../channel/channel_varying.txt", "r");
-  fpi = fopen("../../../channel/channel_varying.txt", "r");
+  fpr = fopen("../../../channel/channel_clean.txt", "r");
+  fpi = fopen("../../../channel/channel_clean.txt", "r");
 
   // fplog = fopen("../../../logs/timing.txt", "w"); // file the data from the timing array is written to
   // fplog2 = fopen("../../../logs/mac.txt", "w"); // when did a TTI start 
   // fplog3 = fopen("../../../logs/tpt.txt", "w"); // MAC log - DL TPT
   // fplog4 = fopen("../../../logs/rnti.txt", "w"); // ensured taplen worked (or) RNTI of UE
-  fpsnr = fopen("../../../logs/snr.txt", "w"); // file the SNR is written to
+  fpsnr = fopen("../../../logs/snr.txt", "w"); // file the all UL parameters are written to
+  fprsrp = fopen("../../../logs/rsrp.txt", "w");
     // fprsrp = fopen("../../../logs/rsrp.txt", "w");
   
   fpcqi = fopen("../../../logs/ul_cqi.txt", "w"); // file the CQI is written to
