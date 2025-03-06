@@ -36,6 +36,12 @@ cd cmake_targets/ran_build/build/
 sudo ./nr-uesoftmodem --uicc0.imsi 001010000000001 -C 3619200000 -r 106 --numerology 1 --ssb 516 -E --sa --rfsim --rfsimulator.options chanmod -O ../../../ci-scripts/conf_files/nrue.uicc.conf -T 10 
 ```
 
+Dockerised Setup
+
+```
+sudo ./nr-uesoftmodem --uicc0.imsi 001010000000001 -C 3619200000 -r 106 --numerology 1 --ssb 516 -E --sa --rfsim --rfsimulator.options chanmod -O ../../../ci-scripts/conf_files/nrue.uicc.conf -T 10 --rfsimulator.serveraddr 192.168.70.140
+```
+
 ## Run DL Traffic
 
 ### Server
