@@ -25,13 +25,13 @@ docker build --target ran-build --tag ran-build:latest --file docker/Dockerfile.
 ### Build oai-gnb
 
 ```
-docker build --target oai-gnb --file docker/Dockerfile.gNB.ubuntu22 -t my-oai-gnb-image .
+docker build --target oai-gnb --file docker/Dockerfile.gNB.ubuntu22 -t my-oai-gnb-image:v1 .
 ```
 
 ### Build oai-nrue
 
 ```
-docker build --target oai-nr-ue --file docker/Dockerfile.nrUE.ubuntu22 -t my-oai-nr-ue-image .
+docker build --target oai-nr-ue --file docker/Dockerfile.nrUE.ubuntu22 -t my-oai-nr-ue-image:v1 .
 ```
 
 ## Run The System
@@ -44,16 +44,16 @@ Go to the `tinytwin-oai/sims/siso` folder and bring up the services defined in t
 sudo docker compose up -d mysql oai-amf oai-smf oai-ext-dn oai-upf
 ```
 
-### Bring Up the nrUE
-
-```
-sudo docker compose up -d oai-nr-ue
-```
-
 ### Bring Up the gNB
 
 ```
 sudo docker compose up -d oai-gnb
+```
+
+### Bring Up the nrUE
+
+```
+sudo docker compose up -d oai-nr-ue
 ```
 
 ### Run Traffic
