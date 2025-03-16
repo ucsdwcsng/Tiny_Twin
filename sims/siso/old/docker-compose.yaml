@@ -1,0 +1,178 @@
+services:
+    tt-gnb:
+        image: my-oai-gnb-image:v1
+        container_name: tt-gnb
+        cap_drop:
+            - ALL
+        cap_add:
+            - NET_ADMIN  # for interface bringup
+            - NET_RAW    # for ping
+        volumes:
+            - /home/pulak/gitrepos/tinytwin-oai:/opt/oai-gnb/tt
+            - ../../targets/PROJECTS/GENERIC-NR-5GC/CONF/gnb.sa.band78.fr1.106PRB.usrpb210.conf:/opt/oai-gnb/etc/gnb.conf
+            - ../../channel/real_random_10tap.txt:/opt/oai-gnb/etc/channel/real_random_10tap.txt
+            - ../../logs_gnb:/opt/oai-gnb/etc/logs
+        # environment:
+        #     USE_ADDITIONAL_OPTIONS: --rfsim -E --sa --rfsimulator.options chanmod -T 10 -O /opt/oai-gnb/etc/gnb.conf
+        #     ASAN_OPTIONS: detect_leaks=0
+        entrypoint: >
+            /bin/bash -c "pwd && cd tt/cmake_targets/ran_build/build/ &&
+            ./nr-softmodem -O ../../../targets/PROJECTS/GENERIC-NR-5GC/CONF/gnb.sa.band78.fr1.106PRB.usrpb210.conf --rfsim -E --sa  --rfsimulator.options chanmod -T 10 &&
+            exec /bin/bash"
+        stdin_open: true  # docker run -i
+        tty: true        # docker run -t
+        # depends_on:
+        #     - oai-ext-dn
+        networks:
+            public_net:
+                ipv4_address: 192.168.70.140
+        # healthcheck:
+        #     test: /bin/bash -c "pgrep nr-softmodem"
+        #     interval: 10s
+        #     timeout: 5s
+        #     retries: 5
+    tt-nrue1:
+        image: my-oai-nr-ue-image:v1
+        container_name: tt-ue1
+        cap_drop:
+            - ALL
+        cap_add:
+            - NET_ADMIN  # for interface bringup
+            - NET_RAW    # for ping
+        volumes:
+            - /home/pulak/gitrepos/tinytwin-oai:/opt/oai-nr-ue/tt
+            - ../../ci-scripts/conf_files/nrue.uicc.conf:/opt/oai-nr-ue/etc/nr-ue.conf
+            - ../../channel/channel.txt:/opt/oai-nr-ue/etc/channel/real_random_10tap.txt
+            - ../../logs_ue:/opt/oai-nr-ue/etc/logs
+        entrypoint: >
+            /bin/bash -c "sleep 3 && cd /opt/oai-nr-ue/tt/cmake_targets/ran_build/build/ &&
+            ./nr-uesoftmodem --uicc0.imsi 001010000000001 -C 3619200000 -r 106 --numerology 1 --ssb 516 -E --sa --rfsim --rfsimulator.options chanmod -O ../../../ci-scripts/conf_files/nrue.uicc.conf -T 10 --rfsimulator.serveraddr 192.168.70.140 &&
+            exec /bin/bash"
+        stdin_open: true  
+        tty: true        
+        depends_on:
+            - tt-gnb
+        networks:
+            public_net:
+                ipv4_address: 192.168.70.150
+        devices:
+             - /dev/net/tun:/dev/net/tun
+        healthcheck:
+            test: /bin/bash -c "pgrep nr-uesoftmodem"
+            interval: 10s
+            timeout: 5s
+            retries: 5
+    tt-nrue2:
+        image: my-oai-nr-ue-image:v1
+        container_name: tt-ue2
+        cap_drop:
+            - ALL
+        cap_add:
+            - NET_ADMIN  # for interface bringup
+            - NET_RAW    # for ping
+        volumes:
+            - /home/pulak/gitrepos/tinytwin-oai:/opt/oai-nr-ue/tt
+            - ../../ci-scripts/conf_files/nrue.uicc.conf:/opt/oai-nr-ue/etc/nr-ue.conf
+            - ../../channel/real_random_10tap.txt:/opt/oai-nr-ue/etc/channel/real_random_10tap.txt
+            - ../../logs_ue:/opt/oai-nr-ue/etc/logs
+        # environment:
+        #     USE_ADDITIONAL_OPTIONS: --uicc0.imsi 208990100001101 -C 3319680000 -r 106 --numerology 1 --ssb 516 -E --sa --rfsim --rfsimulator.options chanmod -O /opt/oai-nr-ue/etc/nr-ue.conf
+        entrypoint: >
+            /bin/bash -c "sleep 4 && cd /opt/oai-nr-ue/tt/cmake_targets/ran_build/build/ &&
+            ./nr-uesoftmodem --uicc0.imsi 208990100001101 -C 3319680000 -r 106 --numerology 1 --ssb 516 -E --sa --rfsim --rfsimulator.options chanmod -O ../../../ci-scripts/conf_files/nrue.uicc.conf -T 10 --rfsimulator.serveraddr 192.168.70.140 &&
+            exec /bin/bash"
+        stdin_open: true  
+        tty: true        
+        depends_on:
+            - tt-gnb
+        networks:
+            public_net:
+                ipv4_address: 192.168.70.151
+        devices:
+             - /dev/net/tun:/dev/net/tun
+        healthcheck:
+            test: /bin/bash -c "pgrep nr-uesoftmodem"
+            interval: 10s
+            timeout: 5s
+            retries: 5
+    tt-nrue3:
+        image: my-oai-nr-ue-image:v1
+        container_name: tt-ue3
+        cap_drop:
+            - ALL
+        cap_add:
+            - NET_ADMIN  # for interface bringup
+            - NET_RAW    # for ping
+        volumes:
+            - /home/pulak/gitrepos/tinytwin-oai:/opt/oai-nr-ue/tt
+            - ../../ci-scripts/conf_files/nrue.uicc.conf:/opt/oai-nr-ue/etc/nr-ue.conf
+            - ../../channel/real_random_10tap.txt:/opt/oai-nr-ue/etc/channel/real_random_10tap.txt
+            - ../../logs_ue:/opt/oai-nr-ue/etc/logs
+        # environment:
+        #     USE_ADDITIONAL_OPTIONS: --uicc0.imsi 001010000000001 -T 10 -C 3619200000 -r 106 --numerology 1 --ssb 516 -E --sa --rfsim --rfsimulator.options chanmod -O /opt/oai-nr-ue/etc/nr-ue.conf
+        entrypoint: >
+            /bin/bash -c "sleep 5 && cd /opt/oai-nr-ue/tt/cmake_targets/ran_build/build/ &&
+            ./nr-uesoftmodem --uicc0.imsi 001010000000001 -C 3619200000 -r 106 --numerology 1 --ssb 516 -E --sa --rfsim --rfsimulator.options chanmod -O ../../../ci-scripts/conf_files/nrue.uicc.conf -T 10 --rfsimulator.serveraddr 192.168.70.140 &&
+            exec /bin/bash"
+        stdin_open: true  
+        tty: true        
+        depends_on:
+            - tt-gnb
+        networks:
+            public_net:
+                ipv4_address: 192.168.70.152
+        devices:
+             - /dev/net/tun:/dev/net/tun
+        healthcheck:
+            test: /bin/bash -c "pgrep nr-uesoftmodem"
+            interval: 10s
+            timeout: 5s
+            retries: 5
+    tt-nrue4:
+        image: my-oai-nr-ue-image:v1
+        container_name: tt-ue4
+        cap_drop:
+            - ALL
+        cap_add:
+            - NET_ADMIN  # for interface bringup
+            - NET_RAW    # for ping
+        volumes:
+            - /home/pulak/gitrepos/tinytwin-oai:/opt/oai-nr-ue/tt
+            - ../../ci-scripts/conf_files/nrue.uicc.conf:/opt/oai-nr-ue/etc/nr-ue.conf
+            - ../../channel/real_random_10tap.txt:/opt/oai-nr-ue/etc/channel/real_random_10tap.txt
+            - ../../logs_ue:/opt/oai-nr-ue/etc/logs
+        entrypoint: >
+            /bin/bash -c "sleep 5 && cd /opt/oai-nr-ue/tt/cmake_targets/ran_build/build/ &&
+            ./nr-uesoftmodem --uicc0.imsi 001010000000001 -C 3619200000 -r 106 --numerology 1 --ssb 516 -E --sa --rfsim --rfsimulator.options chanmod -O ../../../ci-scripts/conf_files/nrue.uicc.conf -T 10 --rfsimulator.serveraddr 192.168.70.140 &&
+            exec /bin/bash"
+        # environment:
+        #     USE_ADDITIONAL_OPTIONS: --uicc0.imsi 001010000000001 -C 3619200000 -r 106 --numerology 1 --ssb 516 -E --sa --rfsim --rfsimulator.options chanmod -O /opt/oai-nr-ue/etc/nr-ue.conf
+        # entrypoint: /bin/bash
+        stdin_open: true  
+        tty: true        
+        depends_on:
+            - tt-gnb
+        networks:
+            public_net:
+                ipv4_address: 192.168.70.153
+        devices:
+             - /dev/net/tun:/dev/net/tun
+        healthcheck:
+            test: /bin/bash -c "pgrep nr-uesoftmodem"
+            interval: 10s
+            timeout: 5s
+            retries: 5
+networks:
+    public_net:
+        driver: bridge
+        external: true
+        name: tt-public-net
+        # ipam:
+        #     config:
+        #         - subnet: 192.168.70.128/26
+        # driver_opts:
+        #     com.docker.network.bridge.name: "tt-public-net"
+    # traffic_net:
+    #     driver: bridge
+    #     external: true
+    #     name: tt-traffic-net

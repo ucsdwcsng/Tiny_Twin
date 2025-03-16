@@ -279,8 +279,8 @@ void init_openair0()
   // fpr = fopen("../../../channel/real_random_10tap.txt", "r");
   // fpi = fopen("../../../channel/real_random_10tap.txt", "r");
 
-  fpr = fopen("../../../channel/channel_clean.txt", "r");
-  fpi = fopen("../../../channel/channel_clean.txt", "r");
+  fpr = fopen("../../../channel/channel_gradual.txt", "r");
+  fpi = fopen("../../../channel/channel_gradual.txt", "r");
 
   // if (snrlog){
     // fpsnr = fopen("../../../logs/snr.txt", "w"); // file the SNR is written to
@@ -291,7 +291,7 @@ void init_openair0()
 
   // fplog = fopen("../../../logs/timing.txt", "w"); // file the data from the timing array is written to
   // fplog2 = fopen("../../../logs/mac.txt", "w"); // when did a TTI start
-  // fplog3 = fopen("../../../logs/log_dl.txt", "w"); // MAC log
+  fplog3 = fopen("../../../logs/ue-mimo.txt", "w"); // MAC log
   // fplog4 = fopen("../../../logs/new_dl.txt", "w"); // ensured taplen worked
   // fplog5 = fopen("../../../logs/mac.txt", "w"); // file the MAC data is written to
 
@@ -631,7 +631,7 @@ int main(int argc, char **argv)
   fclose(fpcqi);
   // fclose(fplog);
   // fclose(fplog2);
-  // fclose(fplog3);
+  fclose(fplog3);
   // fclose(fplog4);
   // fclose(fplog5);
 

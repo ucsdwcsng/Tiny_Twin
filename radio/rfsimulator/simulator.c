@@ -40,6 +40,7 @@
 #include <errno.h>
 #include <sys/epoll.h>
 #include <netdb.h>
+#include <time.h>
 
 #include <common/utils/assertions.h>
 #include <common/utils/LOG/log.h>
@@ -116,7 +117,7 @@ typedef enum { SIMU_ROLE_SERVER = 1, SIMU_ROLE_CLIENT } simuRole;
     {"wait_timeout",           "<wait timeout if no UE connected>\n", simOpt,  .iptr=&(rfsimulator->wait_timeout),     .defintval=1,                     TYPE_INT,       0 },\
   };
 
-//extern FILE *fplog3;
+extern FILE *fplog3;
 static void getset_currentchannels_type(char *buf, int debug, webdatadef_t *tdata, telnet_printfunc_t prnt);
 extern int get_currentchannels_type(char *buf, int debug, webdatadef_t *tdata, telnet_printfunc_t prnt); // in random_channel.c
 static int rfsimu_setchanmod_cmd(char *buff, int debug, telnet_printfunc_t prnt, void *arg);
@@ -1001,8 +1002,16 @@ static int rfsimulator_read(openair0_device *device, openair0_timestamp *ptimest
       
       // // MIMO should be handled here // //
       for (int a=0; a<nbAnt; a++) {//loop over number of Rx antennas
+
         if ( ptr->channel_model != NULL ) { // apply a channel model
           //printf("hiii");
+          // log time
+          struct timespec start; // Structs to store time
+          clock_gettime(CLOCK_REALTIME, &start);
+          if (fplog3 != NULL) {
+            fprintf(fplog3, "Antenna Number: %d \n", a);
+            fprintf(fplog3, "Time: %llu \n", start.tv_sec * 1e9 + start.tv_nsec);
+          }
           rxAddInput(ptr->circularBuf, (c16_t *) samplesVoid[a],
                      a,
                      ptr->channel_model,

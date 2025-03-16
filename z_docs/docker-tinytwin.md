@@ -25,13 +25,13 @@ docker build --target ran-build --tag ran-build:latest --file docker/Dockerfile.
 ### Build oai-gnb
 
 ```
-docker build --target oai-gnb --file docker/Dockerfile.gNB.ubuntu22 -t my-oai-gnb-image:v1 .
+docker build --target tt-gnb --file docker/tinytwin/Dockerfile.TTgNB.ubuntu22 -t tt-gnb:v2 .
 ```
 
 ### Build oai-nrue
 
 ```
-docker build --target oai-nr-ue --file docker/Dockerfile.nrUE.ubuntu22 -t my-oai-nr-ue-image:v1 .
+docker build --target tt-nrue --file docker/tinytwin/Dockerfile.TTnrUE.ubuntu22 -t tt-nrue:v2 .
 ```
 
 ## Run The System

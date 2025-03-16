@@ -1,0 +1,169 @@
+#---------------------------------------------------------------------
+#
+#   Valid for Ubuntu 22.04
+#
+#---------------------------------------------------------------------
+
+FROM ubuntu:jammy AS tt-nrue
+
+ARG NEEDED_GIT_PROXY
+ARG TARGETARCH
+ARG BUILD_OPTION
+ARG E2AP_VERSION=E2AP_V3
+ARG KPM_VERSION=KPM_V3_00
+
+ENV DEBIAN_FRONTEND=noninteractive
+ENV TZ=Europe/Paris
+# ENV BUILD_UHD_FROM_SOURCE=True
+# ENV UHD_VERSION=4.4.0.0
+
+#install developers pkg/repo
+RUN apt-get update && \
+    DEBIAN_FRONTEND=noninteractive apt-get upgrade --yes && \
+    DEBIAN_FRONTEND=noninteractive apt-get install --yes \
+        #gcc needed for build_oai
+        cmake \
+        ninja-build \
+        build-essential \
+        psmisc \
+        git \
+        #use gcc-12 to avoid problems of default gcc-11 in FlexRIC
+        gcc-12 \
+        g++-12 \
+        xxd \
+        libyaml-cpp-dev \
+        libpcre2-dev \
+        python3-dev \
+        bison \
+        flex \
+        m4 \
+        libforms-dev \
+        # python3-pip for conf template generation
+        python3-pip && \
+    update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-12 100 --slave /usr/bin/g++ g++ /usr/bin/g++-12 && \
+    pip3 install --ignore-installed pyyaml
+
+# Add "Tini - A tiny but valid init for containers", https://github.com/krallin/tini
+# it will be copied into target containers, to print exit numbers and handle signals properly
+ENV TINI_VERSION=v0.19.0
+ADD https://github.com/krallin/tini/releases/download/${TINI_VERSION}/tini-${TARGETARCH} /tini
+RUN chmod +x /tini
+
+# In some network environments, GIT proxy is required
+RUN /bin/bash -c "if [[ -v NEEDED_GIT_PROXY ]]; then git config --global http.proxy $NEEDED_GIT_PROXY; fi"
+
+# # Copying only the needed files to create ran-base
+# WORKDIR /oai-ran/cmake_targets/tools
+# COPY cmake_targets/tools/build_helper \
+#      cmake_targets/tools/uhd-4.x-tdd-patch.diff \
+#      ./
+
+# WORKDIR /oai-ran/cmake_targets
+# COPY cmake_targets/build_oai .
+
+# WORKDIR /oai-ran
+# COPY oaienv .
+
+# #run build_oai -I to get the builder image
+# RUN /bin/sh oaienv && \ 
+#     cd cmake_targets && \
+#     mkdir -p log && \
+#     ./build_oai -I -w USRP --install-optional-packages
+
+# RUN rm -Rf /oai-ran
+WORKDIR /opt/tt-ran
+COPY . .
+    
+RUN apt-get update && apt-get install -y \
+    libyaml-cpp-dev
+    
+ENV CMAKE_PREFIX_PATH=/usr/include/yaml-cpp
+    
+# build all targets so final targets can be created afterwards
+RUN /bin/sh oaienv && \
+    cd cmake_targets && \
+    mkdir -p log && \
+    ./build_oai -C && \
+    ./build_oai -I -w SIMU \
+        --gNB --nrUE \
+        --build-lib "telnetsrv enbscope uescope nrscope" \
+        --cmake-opt -DXAPP_MULTILANGUAGE=OFF --cmake-opt -DKPM_VERSION=$KPM_VERSION --cmake-opt -DE2AP_VERSION=$E2AP_VERSION \
+        --cmake-opt -DCMAKE_C_FLAGS="-w" --cmake-opt -DCMAKE_CXX_FLAGS="-w" $BUILD_OPTION && \
+    #     #--cmake-opt -DCMAKE_C_FLAGS="-Werror" --cmake-opt -DCMAKE_CXX_FLAGS="-Werror" $BUILD_OPTION && \
+    # Mainly to see if the sanitize option was perfectly executed
+    echo "---- ldd on executables ----" && \
+    ldd ran_build/build/*softmodem* ran_build/build/nr-cuup && \
+    # ran_build/build/oairu && \
+    echo "---- ldd on shared libraries ----" && \
+    ldd ran_build/build/*.so
+    
+RUN apt-get update && \
+    DEBIAN_FRONTEND=noninteractive apt-get upgrade --yes && \
+    DEBIAN_FRONTEND=noninteractive apt-get install --yes \
+        software-properties-common \
+        procps \
+        libsctp1 \
+        libboost-chrono1.74.0 \
+        libboost-date-time1.74.0 \
+        libboost-filesystem1.74.0 \
+        libboost-regex1.74.0 \
+        libboost-serialization1.74.0 \
+        libboost-thread1.74.0 \
+        libboost-system1.74.0 \
+        libboost-program-options1.74.0 \
+        tzdata \
+        libblas3 \
+        libconfig9 \
+        openssl \
+        net-tools \
+        iperf \
+        iperf3 \
+        iproute2 \
+        iputils-ping \
+        gdb \
+        python3 \
+        python3-six \
+        python3-requests \
+        libusb-1.0-0 \
+        libyaml-cpp-dev && \
+    # if the --sanitize option was used to build, additional packages are required
+    /bin/bash -c 'if [[ "$BUILD_OPTION" = "--sanitize" ]]; then DEBIAN_FRONTEND=noninteractive apt-get install --yes \
+        #libasan5 \ # see below
+        libubsan1 \
+        liblapacke; fi' && \
+    apt-get clean -y && \
+    rm -rf /var/lib/apt/lists/*
+
+WORKDIR /opt/tt-ran/tt
+# COPY --from=gnb-build \
+#     /oai-ran/cmake_targets/ran_build/build/nr-softmodem ./
+# COPY ./docker/scripts/gnb_entrypoint.sh ./entrypoint.sh
+
+# RUN /bin/bash -c "ln -s /usr/local/lib/liboai_usrpdevif.so /usr/local/lib/liboai_device.so" && \
+#     ldconfig && \
+#     echo "---- ldd on nr-softmodem ----" && \
+#     ldd /opt/oai-gnb/bin/nr-softmodem && \
+#     echo "---- ldd on shared libraries ----" && \
+#     ldd /usr/local/lib/liboai_eth_transpro.so \
+#         /usr/local/lib/librfsimulator.so \
+#         /usr/local/lib/liboai_usrpdevif.so \
+#         /usr/local/lib/libcoding.so \
+#         /usr/local/lib/libparams_libconfig.so \
+#         /usr/local/lib/libdfts.so \
+#         /usr/local/lib/libldpc*.so \
+#         /usr/local/lib/libtelnetsrv.so \
+#         /usr/local/lib/libtelnetsrv_ci.so 
+#         # \
+#         # /usr/local/lib/libuhd.so.4.4.0
+
+WORKDIR /opt/tt-ran
+#EXPOSE 2152/udp  # S1U, GTP/UDP
+#EXPOSE 22100/tcp # ?
+#EXPOSE 36412/udp # S1C, SCTP/UDP
+#EXPOSE 36422/udp # X2C, SCTP/UDP
+#EXPOSE 50000/udp # IF5 / ORI (control)
+#EXPOSE 50001/udp # IF5 / ECPRI (data)
+
+# COPY --from=gnb-base /tini /tini
+ENTRYPOINT ["/tini", "-v", "--", "/opt/tt-ran/docker/scripts/nr_ue_entrypoint.sh"]
+# CMD ["/opt/oai-gnb/bin/nr-softmodem"]

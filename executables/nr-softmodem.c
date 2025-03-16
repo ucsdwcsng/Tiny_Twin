@@ -100,6 +100,7 @@ extern FILE *fplog;
 extern FILE *fplog3;
 extern FILE *fplog4;
 extern FILE *fpsnr;
+extern FILE *fptti;
 extern FILE *fprsrp;
 extern FILE *fpcqi;
 extern FILE *fpultpt;
@@ -136,6 +137,7 @@ FILE *fpultpt;
 FILE *fpdltpt;
 FILE *fpulmcs;
 FILE *fpdlmcs;
+FILE *fptti;
 int tti_counter=0;
 
 long long unsigned int timing_array[_ARRAY_SIZE];
@@ -649,15 +651,16 @@ int main( int argc, char **argv ) {
   // fpr = fopen("../../../channel/real_random_10tap.txt", "r");
   // fpi = fopen("../../../channel/real_random_10tap.txt", "r");
 
-  // fpr = fopen("../../../channel/channel_v8.txt", "r");
-  // fpi = fopen("../../../channel/channel_v8.txt", "r");
+  fpr = fopen("../../../channel/channel_gradual.txt", "r");
+  fpi = fopen("../../../channel/channel_gradual.txt", "r");
 
   // fplog = fopen("../../../logs/timing.txt", "w"); // file the data from the timing array is written to
   // fplog2 = fopen("../../../logs/mac.txt", "w"); // when did a TTI start 
-  // fplog3 = fopen("../../../logs/tpt.txt", "w"); // MAC log - DL TPT
+  fplog3 = fopen("../../../logs/gnb-mimo.txt", "w"); // MAC log - DL TPT
   // fplog4 = fopen("../../../logs/rnti.txt", "w"); // ensured taplen worked (or) RNTI of UE
   fpsnr = fopen("../../../logs/snr.txt", "w"); // file the all UL parameters are written to
   fprsrp = fopen("../../../logs/rsrp.txt", "w");
+  fptti = fopen("../../../logs/tti.txt", "w");
     // fprsrp = fopen("../../../logs/rsrp.txt", "w");
   
   // fpcqi = fopen("../../../logs/ul_cqi.txt", "w"); // file the CQI is written to
@@ -670,12 +673,12 @@ int main( int argc, char **argv ) {
   // // DOCKER VERSIONS //
   // fpr = fopen(channel_file, "r");
   // fpi = fopen(channel_file, "r");
-  fpi = fopen("../etc/channel/real_random_10tap.txt", "r");
-  fpr = fopen("../etc/channel/real_random_10tap.txt", "r");
+  // fpi = fopen("../etc/channel/real_random_10tap.txt", "r");
+  // fpr = fopen("../etc/channel/real_random_10tap.txt", "r");
 
-  fplog = fopen("../etc/logs/timing.txt", "w"); // file the data from the timing array is written to
-  fpsnr = fopen("../etc/logs/snr.txt", "w"); // file the data from the timing array is written to
-  fprsrp = fopen("../etc/logs/rsrp.txt", "w"); // file the data from the timing array is written to
+  // fplog = fopen("../etc/logs/timing.txt", "w"); // file the data from the timing array is written to
+  // fpsnr = fopen("../etc/logs/snr.txt", "w"); // file the data from the timing array is written to
+  // fprsrp = fopen("../etc/logs/rsrp.txt", "w"); // file the data from the timing array is written to
   // fplog2 = fopen("../etc/logs/mac.txt", "w"); // when did a TTI start
   // fplog3 = fopen("../etc/logs/log_dl.txt", "w"); // MAC logs
   // // fplog4 = fopen("/home/wcsng/tinytwin-oai/logs/new_dl.txt", "w"); // ensured taplen worked
@@ -869,9 +872,10 @@ int main( int argc, char **argv ) {
 
   // flush all content of timing_array to the file pointed to by fplog
   for(int itt = 0; itt < _ARRAY_SIZE; itt++) {
-    fprintf(fplog, "%llu\n", timing_array[itt]);
+    fprintf(fptti, "%llu\n", timing_array[itt]);
   }
-  fflush(fplog);\
+  fprintf(fptti, "%d\n", 9999);
+  fflush(fptti);
 
   // for(int itt2 = 0; itt2 < _FLOAT_ARRAY_SIZE; itt2++) {
   //   fprintf(fplog3, "%f\n", float_array[itt2]);
@@ -926,9 +930,10 @@ int main( int argc, char **argv ) {
   fclose(fpi);
   fclose(fplog);
   fclose(fpr);
-  // fclose(fplog3);
+  fclose(fplog3);
   // fclose(fplog4);
   fclose(fpsnr);
+  fclose(fptti);
   fclose(fprsrp);
   fclose(fpcqi);
   fclose(fpultpt);
