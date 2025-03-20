@@ -52,11 +52,14 @@
 #define HALFWORD 16
 #define WORD 32
 //#define SIZE_OF_POINTER sizeof (void *)
+
+#define _ARRAY_SIZE (80 * 1024 * 1024 / sizeof(long long unsigned int))
 #define _INT_ARRAY_SIZE (3 * 80 * 1024 * 1024 / sizeof(int))
 #define _HEXA_ARRAY_SIZE (80 * 1024 * 1024 / sizeof(unsigned int))
 #define _FLOAT_ARRAY_SIZE (80 * 1024 * 1024 / sizeof(float))
 
 extern FILE *fplog2;
+extern FILE *fplog3;
 extern FILE *fpsnr;
 // extern FILE *fpcqi;
 extern FILE *fpdltpt;
@@ -68,7 +71,10 @@ extern int snrlog;
 extern int tptlog;
 extern int mcslog;
 extern int tti_counter;
+extern int tti_log;
 
+extern long long unsigned int timing_array[_ARRAY_SIZE];
+extern int timing_array_index;
 extern int int_array[_INT_ARRAY_SIZE];
 extern int int_array_index;
 extern float float_array[_FLOAT_ARRAY_SIZE];
@@ -776,6 +782,17 @@ static void pf_dl(module_id_t module_id,
 
   // // log TTI index // //
   tti_counter = tti_counter + 1;
+
+  // // log TTI times // //
+  struct timespec start; // Structs to store time
+  // fprintf(fplog3, "%d\n", tti_log);
+  clock_gettime(CLOCK_REALTIME, &start);
+  if (tti_log){
+    if (timing_array_index < _ARRAY_SIZE) {
+      timing_array[timing_array_index] = start.tv_sec * 1000000000 + start.tv_nsec;
+      timing_array_index = timing_array_index + 1;  
+    }
+  }
 
   const int min_rbSize = 5;
 

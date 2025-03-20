@@ -52,12 +52,16 @@ extern int snrlog;
 extern int cqilog;
 extern int tptlog;
 extern int mcslog;
+extern int tti_log;
+
+extern FILE *fplog3;
 
 int taplen;
 int snrlog = 0;
 int cqilog = 0;
 int tptlog = 0;
 int mcslog = 0;
+int tti_log = 0;
 
 // clang-format off
 static char  config_helpstr [] = "\n lte-softmodem -O [config mode]<:dbgl[debugflags]><:incp[path]>\n \
@@ -253,6 +257,7 @@ configmodule_interface_t *load_configmodule(int argc,
   int SNRIdx=-1;
   int CQIIdx=-1;
   int TPTIdx=-1;
+  int TTIIdx=-1;
   int MCSIdx=-1;
   int OWoptIdx = -1;
 
@@ -271,35 +276,79 @@ configmodule_interface_t *load_configmodule(int argc,
       OoptIdx=i;
     }
 
-    if (argv[i][1] == 'T' && i < (argc - 1)) {
-        taplen = atoi(argv[i + 1]);
-        TapsIdx = i;
+    // fprintf(fplog3, "%s\n", argv[i]);
+
+    // if (strcmp(&argv[i][1], "TP") == 0 && i < (argc - 1)) {
+    //     taplen = atoi(argv[i + 1]);
+    //     TapsIdx = i;
+    // }
+
+    char *TAPopt = strstr(argv[i], "TAP");
+    if (TAPopt == argv[i] + 2) {
+      taplen = argv[i + 1] ? atoi(argv[i + 1]) : 0;
+      TapsIdx = i;
     }
 
-    if (argv[i][1] == 'S' && i < (argc - 1)) {
-        snrlog = atoi(argv[i + 1]);
-        SNRIdx = i;
+    // if (strcmp(&argv[i][1], "SNR") == 0 && i < (argc - 1)) {
+    //     snrlog = atoi(argv[i + 1]);
+    //     SNRIdx = i;
+    // }
+
+    char *SNRopt = strstr(argv[i], "SNR");
+    if (SNRopt == argv[i] + 2) {
+      snrlog = argv[i + 1] ? atoi(argv[i + 1]) : 0;
+      SNRIdx = i;
     }
 
-    if (argv[i][1] == 'Q' && i < (argc - 1)) {
-        cqilog = atoi(argv[i + 1]);
-        CQIIdx = i;
+    // if (strcmp(&argv[i][1], "CQI") == 0 && i < (argc - 1)) {
+    //     cqilog = atoi(argv[i + 1]);
+    //     CQIIdx = i;
+    // }
+
+    char *CQIopt = strstr(argv[i], "CQI");
+    if (CQIopt == argv[i] + 2) {
+      cqilog = argv[i + 1] ? atoi(argv[i + 1]) : 0;
+      CQIIdx = i;
     }
 
-    if (argv[i][1] == 'P' && i < (argc - 1)) {
-        tptlog = atoi(argv[i + 1]);
-        TPTIdx = i;
+    // if (strcmp(&argv[i][1], "TT") == 0 && i < (argc - 1)) {
+    //     tptlog = atoi(argv[i + 1]);
+    //     TPTIdx = i;
+    // }
+
+    char *TPTopt = strstr(argv[i], "TPT");
+    if (TPTopt == argv[i] + 2) {
+      tptlog = argv[i + 1] ? atoi(argv[i + 1]) : 0;
+      TPTIdx = i;
     }
 
-    if (argv[i][1] == 'X' && i < (argc - 1)) {
-        mcslog = atoi(argv[i + 1]);
-        MCSIdx = i;
+    // if (argv[i][1] == 'X' && i < (argc - 1)) {
+    //     mcslog = atoi(argv[i + 1]);
+    //     MCSIdx = i;
+    // }
+
+    char *MCSopt = strstr(argv[i], "MCS");
+    if (MCSopt == argv[i] + 2) {
+      mcslog = argv[i + 1] ? atoi(argv[i + 1]) : 0;
+      MCSIdx = i;
+    }
+
+    // if (strcmp(&argv[i][1], "TTI") == 0 && i < (argc - 1)) {
+    //     tti_log = atoi(argv[i + 1]);
+    //     TTIIdx = i;
+    // }
+
+    char *TTIopt = strstr(argv[i], "TTI");
+    if (TTIopt == argv[i] + 2) {
+      tti_log = argv[i + 1] ? atoi(argv[i + 1]) : 0;
+      TTIIdx = i;
     }
 
     char *OWopt = strstr(argv[i], "OW");
     if (OWopt == argv[i] + 2) {
       OWoptIdx = i;
     }
+
     if ( strstr(argv[i], "help_config") != NULL  ) {
       config_printhelp(Config_Params, sizeofArray(Config_Params), CONFIG_SECTIONNAME);
       exit(0);
@@ -389,6 +438,11 @@ configmodule_interface_t *load_configmodule(int argc,
     if (TPTIdx >= 0) {
       cfgptr->argv_info[TPTIdx] |= CONFIG_CMDLINEOPT_PROCESSED;
       cfgptr->argv_info[TPTIdx+1] |= CONFIG_CMDLINEOPT_PROCESSED;
+    }  
+
+    if (TTIIdx >= 0) {
+      cfgptr->argv_info[TTIIdx] |= CONFIG_CMDLINEOPT_PROCESSED;
+      cfgptr->argv_info[TTIIdx+1] |= CONFIG_CMDLINEOPT_PROCESSED;
     }  
 
     if (MCSIdx >= 0) {

@@ -1008,10 +1008,10 @@ static int rfsimulator_read(openair0_device *device, openair0_timestamp *ptimest
           // log time
           struct timespec start; // Structs to store time
           clock_gettime(CLOCK_REALTIME, &start);
-          if (fplog3 != NULL) {
-            fprintf(fplog3, "Antenna Number: %d \n", a);
-            fprintf(fplog3, "Time: %llu \n", start.tv_sec * 1e9 + start.tv_nsec);
-          }
+          // if (fplog3 != NULL) {
+          //   fprintf(fplog3, "Antenna Number: %d \n", a);
+          //   fprintf(fplog3, "Time: %llu \n", start.tv_sec * 1e9 + start.tv_nsec);
+          // }
           rxAddInput(ptr->circularBuf, (c16_t *) samplesVoid[a],
                      a,
                      ptr->channel_model,
