@@ -160,24 +160,24 @@ WORKDIR /opt/tt-ran/tt
 #     /oai-ran/cmake_targets/ran_build/build/nr-softmodem ./
 # COPY ./docker/scripts/gnb_entrypoint.sh ./entrypoint.sh
 
-RUN /bin/bash -c "ln -s /usr/local/lib/liboai_usrpdevif.so /usr/local/lib/liboai_device.so" && \
-    ldconfig && \
-    echo "---- ldd on nr-softmodem ----" && \
-    ldd /opt/tt-ran/cmake_targets/ran_build/build/nr-softmodem && \
-    echo "---- ldd on nr-uesoftmodem ----" && \
-    ldd /opt/tt-ran/cmake_targets/ran_build/build/nr-uesoftmodem && \
-    echo "---- ldd on shared libraries ----" && \
-    ldd /usr/local/lib/liboai_eth_transpro.so \
-        /usr/local/lib/librfsimulator.so \
-        /usr/local/lib/liboai_usrpdevif.so \
-        /usr/local/lib/libcoding.so \
-        /usr/local/lib/libparams_libconfig.so \
-        /usr/local/lib/libdfts.so \
-        /usr/local/lib/libldpc*.so \
-        /usr/local/lib/libtelnetsrv.so \
-        /usr/local/lib/libtelnetsrv_ci.so 
-        # \
-        # /usr/local/lib/libuhd.so.4.4.0
+# RUN /bin/bash -c "ln -s /usr/local/lib/liboai_usrpdevif.so /usr/local/lib/liboai_device.so" && \
+#     ldconfig && \
+#     echo "---- ldd on nr-softmodem ----" && \
+#     ldd /opt/tt-ran/cmake_targets/ran_build/build/nr-softmodem && \
+#     echo "---- ldd on nr-uesoftmodem ----" && \
+#     ldd /opt/tt-ran/cmake_targets/ran_build/build/nr-uesoftmodem && \
+#     echo "---- ldd on shared libraries ----" && \
+#     ldd /usr/local/lib/liboai_eth_transpro.so \
+#         /usr/local/lib/librfsimulator.so \
+#         /usr/local/lib/liboai_usrpdevif.so \
+#         /usr/local/lib/libcoding.so \
+#         /usr/local/lib/libparams_libconfig.so \
+#         /usr/local/lib/libdfts.so \
+#         /usr/local/lib/libldpc*.so \
+#         /usr/local/lib/libtelnetsrv.so \
+#         /usr/local/lib/libtelnetsrv_ci.so 
+#         # \
+#         # /usr/local/lib/libuhd.so.4.4.0
 
 WORKDIR /opt/tt-ran
 #EXPOSE 2152/udp  # S1U, GTP/UDP
