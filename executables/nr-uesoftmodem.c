@@ -291,7 +291,7 @@ void init_openair0()
 
   // fplog = fopen("../../../logs/timing.txt", "w"); // file the data from the timing array is written to
   // fplog2 = fopen("../../../logs/mac.txt", "w"); // when did a TTI start
-  fplog3 = fopen("../../../logs/ue-mimo.txt", "w"); // MAC log
+  // fplog3 = fopen("../../../logs/ue-mimo.txt", "w"); // MAC log
   // fplog4 = fopen("../../../logs/new_dl.txt", "w"); // ensured taplen worked
   // fplog5 = fopen("../../../logs/mac.txt", "w"); // file the MAC data is written to
 
