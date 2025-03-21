@@ -44,7 +44,7 @@ services:
             - NET_RAW    # for ping
         volumes:
             - ../../../tinytwin-oai:/opt/tt-ran/tt:rw   
-            - ../../channel/channel.txt:/opt/tt-ran/channel/channel_gradual.txt
+            # - ../../channel/channel.txt:/opt/tt-ran/channel/channel_gradual.txt
             - ../../ci-scripts/conf_files/nrue.uicc.conf:/opt/oai-nr-ue/etc/nr-ue.conf
             - ../../logs_ue:/opt/oai-nr-ue/etc/logs
         entrypoint: >
@@ -77,7 +77,7 @@ services:
             - NET_RAW    # for ping
         volumes:
             - ../../../tinytwin-oai:/opt/tt-ran/tt
-            - ../../channel/channel.txt:/opt/tt-ran/channel/channel_gradual.txt
+            # - ../../channel/channel.txt:/opt/tt-ran/channel/channel_gradual.txt
             - ../../ci-scripts/conf_files/nrue.uicc.conf:/opt/oai-nr-ue/etc/nr-ue.conf
             - ../../logs_ue:/opt/oai-nr-ue/etc/logs
         entrypoint: >
@@ -110,7 +110,7 @@ services:
             - NET_RAW    # for ping
         volumes:
             - ../../../tinytwin-oai:/opt/tt-ran/tt:rw
-            - ../../channel/channel.txt:/opt/tt-ran/channel/channel_gradual.txt
+            # - ../../channel/channel.txt:/opt/tt-ran/channel/channel_gradual.txt
             - ../../ci-scripts/conf_files/nrue.uicc.conf:/opt/oai-nr-ue/etc/nr-ue.conf
             - ../../logs_ue:/opt/oai-nr-ue/etc/logs
         # entrypoint: >
