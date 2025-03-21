@@ -119,7 +119,7 @@ docker exec -it tt-mimo-gnb bash
 3. Build the system
 
 ```
-cd /opt/tt-ran/tt/cmake_targets/ran_build/build/
+cd /opt/tt-ran/tt/cmake_targets/
 ./build_oai -C # gets rid of any existing installation
 ./build_oai -I -w SIMU --nrUE --gNB # builds dependencies and the rfsim gNB and UEs
 ```
