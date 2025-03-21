@@ -6,7 +6,7 @@ This document assumes you are in the `tinytwin-oai` folder.
 
 Remove any existing OAI Docker images using `docker rmi`.
 
-### Build ran-base
+<!-- ### Build ran-base
 
 Contains all the dependencies used to run OAI.
 
@@ -20,7 +20,7 @@ Contains the compiled and linked executable to run the gNB and the UE.
 
 ```
 docker build --target ran-build --tag ran-build:latest --file docker/Dockerfile.build.ubuntu22 .
-```
+``` -->
 
 ### Build oai-gnb
 
@@ -52,7 +52,7 @@ sudo docker compose up -d
 1. Bring up the Docker Container
 
 ```
-cd siso
+cd ../siso
 sudo docker compose up -d tt-gnb
 ```
 
@@ -65,7 +65,7 @@ docker exec -it tt-gnb bash
 3. Build the system
 
 ```
-cd /opt/tt-ran/tt/cmake_targets/ran_build/build/
+cd /opt/tt-ran/tt/cmake_targets/
 ./build_oai -C # gets rid of any existing installation
 ./build_oai -I -w SIMU --nrUE --gNB # builds dependencies and the rfsim gNB and UEs
 ```
@@ -89,13 +89,17 @@ You can bring up multiple UEs (upto 6 already defined in this `docker-compose.ya
 
 _NOTE: Only bring up a fresh UE after the current UE has been connected._
 
-2. (Optional) Run the UE executable
+2. Run the UE executable
+
+The UEs can connect to the gNB without you having to bash into the container, jsut by simply bringing up the UE container, but that would depend on the `entrypoint` commands of the UE in the `docker-compose.yaml`. Comment out the correct one.
 
 ```
 ./nr-uesoftmodem --uicc0.imsi 001010000000001 -C 3619200000 -r 106 --numerology 1 --ssb 516 -E --sa --rfsim --rfsimulator.options chanmod -O ../../../ci-scripts/conf_files/nrue.uicc.conf --TAP 1 --rfsimulator.serveraddr 192.168.70.140
 ```
 
-### MIMO
+_NOTE: Both the gNB and UE execute from the same shared directory for now. So building in one, shows up in the other._
+
+<!-- ### MIMO
 
 #### Bring Up the gNB
 
@@ -144,4 +148,4 @@ _NOTE: Only bring up a fresh UE after the current UE has been connected._
 ```
 ./nr-uesoftmodem --uicc0.imsi 001010000000001 -C 3329760000 -r 162 --numerology 1 --ssb 852 --sa --rfsim --rfsimulator.options chanmod -O ../../../ci-scripts/conf_files/nrue.uicc.conf --TAP 1 --rfsimulator.serveraddr 192.168.70.140 --ue-nb-ant-tx 2 --ue-nb-ant-rx 2 --uecap_file ../../../targets/PROJECTS/GENERIC-NR-5GC/CONF/uecap_ports2.xml
 ```
-
+ -->
