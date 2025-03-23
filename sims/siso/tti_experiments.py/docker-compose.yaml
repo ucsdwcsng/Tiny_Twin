@@ -1,0 +1,112 @@
+
+services:
+    tt-gnb:
+        image: tt-gnb:v2
+        container_name: tt-gnb
+        privileged: true
+        cap_drop:
+            - ALL
+        cap_add:
+            - NET_ADMIN  # for interface bringup
+            - NET_RAW    # for ping
+        volumes:
+            - ../../../../tinytwin-oai:/opt/tt-ran/tt:rw
+            - ../../../targets/PROJECTS/GENERIC-NR-5GC/CONF/gnb.sa.band78.fr1.106PRB.usrpb210.conf:/opt/tt-ran/etc/gnb.conf
+            - ../../../channel/channel.txt:/opt/tt-ran/tt/channel/channel_gradual.txt
+            - ../../../logs_gnb:/opt/tt-ran/etc/logs
+        # environment:
+        #     USE_ADDITIONAL_OPTIONS: --rfsim -E --sa --rfsimulator.options chanmod -T 10 -O /opt/oai-gnb/etc/gnb.conf
+        #     ASAN_OPTIONS: detect_leaks=0
+        # entrypoint: >
+        #     /bin/bash -c "pwd && cd tt/cmake_targets/ran_build/build/ &&
+        #     ./nr-softmodem -O ../../../targets/PROJECTS/GENERIC-NR-5GC/CONF/gnb.sa.band78.fr1.106PRB.usrpb210.conf --rfsim -E --sa  --rfsimulator.options chanmod -TP 10 --TTI 1 --SNR 1
+        #     exec /bin/bash"
+        entrypoint: /bin/bash
+        stdin_open: true  # docker run -i
+        tty: true        # docker run -t
+        # depends_on:
+        #     - oai-ext-dn
+        networks:
+            public_net:
+                ipv4_address: 192.168.70.140
+        # healthcheck:
+        #     test: /bin/bash -c "pgrep nr-softmodem"
+        #     interval: 10s
+        #     timeout: 5s
+        #     retries: 5
+
+
+
+    tt-nrue151:
+        image: tt-nrue:v2
+        container_name: tt-ue151
+        privileged: true
+        cap_drop:
+            - ALL
+        cap_add:
+            - NET_ADMIN  # for interface bringup
+            - NET_RAW    # for ping
+        volumes:
+            - ../../../../tinytwin-oai:/opt/tt-ran/tt:rw   
+            # - ../../../channel/channel.txt:/opt/tt-ran/channel/channel_gradual.txt
+            - ../../../ci-scripts/conf_files/nrue.uicc.conf:/opt/oai-nr-ue/etc/nr-ue.conf
+            - ../../../logs_ue:/opt/oai-nr-ue/etc/logs
+        entrypoint: >
+            /bin/bash -c "ls && cd tt/cmake_targets/ran_build/build/ &&
+            ./nr-uesoftmodem --uicc0.imsi 001010000000001 -C 3619200000 -r 106 --numerology 1 --ssb 516 -E --sa --rfsim --rfsimulator.options chanmod -O ../../../ci-scripts/conf_files/nrue.uicc.conf --TAP 1 --rfsimulator.serveraddr 192.168.70.140 &&
+            exec /bin/bash"
+        # entrypoint: /bin/bash
+        stdin_open: true  
+        tty: true        
+        networks:
+            public_net:
+                ipv4_address: 192.168.70.151
+        devices:
+             - /dev/net/tun:/dev/net/tun
+        healthcheck:
+            test: /bin/bash -c "pgrep nr-uesoftmodem"
+            interval: 10s
+            timeout: 5s
+            retries: 5
+ 
+    
+
+    tt-nrue152:
+        image: tt-nrue:v2
+        container_name: tt-ue152
+        privileged: true
+        cap_drop:
+            - ALL
+        cap_add:
+            - NET_ADMIN  # for interface bringup
+            - NET_RAW    # for ping
+        volumes:
+            - ../../../../tinytwin-oai:/opt/tt-ran/tt:rw   
+            # - ../../../channel/channel.txt:/opt/tt-ran/channel/channel_gradual.txt
+            - ../../../ci-scripts/conf_files/nrue.uicc.conf:/opt/oai-nr-ue/etc/nr-ue.conf
+            - ../../../logs_ue:/opt/oai-nr-ue/etc/logs
+        entrypoint: >
+            /bin/bash -c "ls && cd tt/cmake_targets/ran_build/build/ &&
+            ./nr-uesoftmodem --uicc0.imsi 001010000000002 -C 3619200000 -r 106 --numerology 1 --ssb 516 -E --sa --rfsim --rfsimulator.options chanmod -O ../../../ci-scripts/conf_files/nrue.uicc.conf --TAP 1 --rfsimulator.serveraddr 192.168.70.140 &&
+            exec /bin/bash"
+        # entrypoint: /bin/bash
+        stdin_open: true  
+        tty: true        
+        networks:
+            public_net:
+                ipv4_address: 192.168.70.152
+        devices:
+             - /dev/net/tun:/dev/net/tun
+        healthcheck:
+            test: /bin/bash -c "pgrep nr-uesoftmodem"
+            interval: 10s
+            timeout: 5s
+            retries: 5
+ 
+    
+
+networks:
+    public_net:
+        driver: bridge
+        external: true
+        name: tt-public-net
