@@ -226,6 +226,14 @@ void rxAddInput(const c16_t *input_sig,
   //       fflush(fplog); // Ensure it's written to the file immediately
   // }
 
+    // assign value to threads
+  int threads = 4;
+
+  // assign value to chunk    
+  int chunk = 100;
+  // X*H*N/threads;
+
+  #pragma omp parallel for schedule(guided, chunk) num_threads(threads)
   for (int i=0; i<nbSamples; i++) {
    
     struct complex16 *out_ptr=after_channel_sig+i;

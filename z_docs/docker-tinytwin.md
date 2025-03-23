@@ -67,7 +67,10 @@ docker exec -it tt-gnb bash
 ```
 cd /opt/tt-ran/tt/cmake_targets/
 ./build_oai -C # gets rid of any existing installation
-./build_oai -I -w SIMU --nrUE --gNB # builds dependencies and the rfsim gNB and UEs
+# builds dependencies and the rfsim gNB and UEs
+./build_oai -I -w SIMU --nrUE --gNB \
+    --cmake-opt "-DCMAKE_C_FLAGS=-fopenmp" \
+    --cmake-opt "-DCMAKE_CXX_FLAGS=-fopenmp" 
 ```
 
 4. Run the gNB executable
