@@ -21,6 +21,7 @@ services:
             - ../../../targets/PROJECTS/GENERIC-NR-5GC/CONF/gnb.sa.band78.fr1.106PRB.usrpb210.conf:/opt/tt-ran/etc/gnb.conf
             - ../../../channel/channel.txt:/opt/tt-ran/tt/channel/channel_gradual.txt
             - ../../../logs_gnb:/opt/tt-ran/etc/logs
+            - ./run.sh:/opt/tt-ran/run.sh
         # environment:
         #     USE_ADDITIONAL_OPTIONS: --rfsim -E --sa --rfsimulator.options chanmod -T 10 -O /opt/oai-gnb/etc/gnb.conf
         #     ASAN_OPTIONS: detect_leaks=0
@@ -60,12 +61,12 @@ def read_starting(file_name):
         for i, line in enumerate(f, start=1):
             # if (i-1) % 3 == 0:
             words = line.split()
-            if len(words) >= 4:
+            if len(words) >= 1:
                 try:
-                    float_value = float(words[3])  # Convert the 4th word to float
+                    float_value = float(words[0])  # Convert the 4th word to float
                     float_values.append(float_value)
                 except ValueError:
-                    print(f"Cannot convert '{words[3]}' to float on line {i}")
+                    print(f"Cannot convert '{words[0]}' to float on line {i}")
             else:
                 print(f"Line {i} does not have 4 words")
     return float_values
@@ -142,13 +143,17 @@ def autoUE():
         with open("./docker-compose.yaml","+w") as f:
             f.write(file)
         os.system(f"docker compose up -d tt-gnb")
-        time.sleep(10)
-        os.system(f"docker exec -it -d tt-gnb  /opt/tt-ran/tt/cmake_targets/ran_build/build/nr-softmodem -O /opt/tt-ran/tt/targets/PROJECTS/GENERIC-NR-5GC/CONF/gnb.sa.band78.fr1.106PRB.usrpb210.conf --rfsim -E --sa  --rfsimulator.options chanmod --TAP 1 --TTI 1 --SNR 1")
+        print("set up ran")
+        time.sleep(15)
+        os.system(f"docker exec -it tt-gnb chmod +x run.sh ")
+        os.system(f"docker exec -d tt-gnb ./run.sh ")
+        #os.system(f"docker exec -d tt-gnb  cd /opt/tt-ran/tt/cmake_targets/ran_build/build/ && ./nr-softmodem -O /opt/tt-ran/tt/targets/PROJECTS/GENERIC-NR-5GC/CONF/gnb.sa.band78.fr1.106PRB.usrpb210.conf --rfsim -E --sa  --rfsimulator.options chanmod --TAP 1 --TTI 1 --SNR 1")
         for i in range(151,151+kk):
             os.system(f"docker compose up -d tt-nrue{i}")
             time.sleep(min((i-150)*6,37))
-                
-        time.sleep(10)
+        time.sleep(15)
+        print("kill gnb")
+        time.sleep(15)
 
         os.system(f"docker compose down")
 
