@@ -402,6 +402,9 @@ def processDATA():
         plt.tight_layout()
         plt.show()
 
+        # save 
+        fig.savefig("plotting.png", format="png", dpi=150)
+
 if __name__ == "__main__":
     
 

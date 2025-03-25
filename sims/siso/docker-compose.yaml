@@ -16,11 +16,11 @@ services:
         # environment:
         #     USE_ADDITIONAL_OPTIONS: --rfsim -E --sa --rfsimulator.options chanmod -T 10 -O /opt/oai-gnb/etc/gnb.conf
         #     ASAN_OPTIONS: detect_leaks=0
-        # entrypoint: >
-        #     /bin/bash -c "pwd && cd tt/cmake_targets/ran_build/build/ &&
-        #     ./nr-softmodem -O ../../../targets/PROJECTS/GENERIC-NR-5GC/CONF/gnb.sa.band78.fr1.106PRB.usrpb210.conf --rfsim -E --sa  --rfsimulator.options chanmod -TP 10 --TTI 1 --SNR 1
-        #     exec /bin/bash"
-        entrypoint: /bin/bash
+        entrypoint: >
+            /bin/bash -c "pwd && cd tt/cmake_targets/ran_build/build/ &&
+            ./nr-softmodem -O ../../../targets/PROJECTS/GENERIC-NR-5GC/CONF/gnb.sa.band78.fr1.106PRB.usrpb210.conf --rfsim -E --sa  --rfsimulator.options chanmod --TAP 1 --TTI 1 --SNR 1 &&
+            exec /bin/bash"
+        # entrypoint: /bin/bash
         stdin_open: true  # docker run -i
         tty: true        # docker run -t
         # depends_on:
