@@ -691,9 +691,9 @@ static void pf_dl(module_id_t module_id,
 
     // // log DL TPT // //
     if (tptlog){
-        fprintf(fprsrp, "TTI Count: %d\n", tti_counter);
-        fprintf(fprsrp, "DL TPT: %f\n", UE->dl_thr_ue);  
-        fprintf(fprsrp, "DL MAC-ReTx: %d\n", sched_pdsch->dl_harq_pid);
+        fprintf(fpsnr, "TTI Count: %d\n", tti_counter);
+        fprintf(fpsnr, "DL TPT: %f\n", UE->dl_thr_ue);  
+        fprintf(fpsnr, "DL MAC-ReTx: %d\n", sched_pdsch->dl_harq_pid);
     }
 
     if (remainUEs == 0)
