@@ -230,7 +230,7 @@ def autoUE():
             os.system(f"docker exec -d oai-ext-dn iperf -u -t 86400 -i 1 -fk -B 192.168.71.135 -b 2M -c 10.0.0.{i-149}")
 
 
-
+        #test
         time.sleep(120)
         print("kill gnb")
         time.sleep(15)
