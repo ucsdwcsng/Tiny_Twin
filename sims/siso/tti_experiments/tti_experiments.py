@@ -110,7 +110,7 @@ def read_more(file_name):
             words = line.split()
             if len(words) >= 1:
                 try:
-                    float_value = float(words[2])  # Convert the last word to float
+                    float_value = float(words[-1])  # Convert the last word to float
                     if words[0] == 'UL':
                         # extra = float(words[3])
                         if words[1] == 'SNR:':
@@ -147,7 +147,7 @@ def read_more(file_name):
                             ul_mcs_values.append(float_value)
 
                 except ValueError:
-                    print(f"Cannot convert '{words[2]}' to float on line {i}")
+                    print(f"Cannot convert '{words[-1]}' to float on line {i}")
             else:
                 print(f"Line {i} does not have 4 words")
             previous_line = line
@@ -197,6 +197,7 @@ def create_docker(i):
 def autoUE():
     global flag
     flag=1
+    #os.system("docker exec -it oai-ext-dn iperf -s -i 1 -B 192.168.71.135")
     for kk in range(1,int(sys.argv[1])+1):
         
         while flag == 0:
@@ -221,6 +222,7 @@ def autoUE():
         for i in range(151,151+kk):
             os.system(f"docker compose up -d tt-nrue{i}")
             time.sleep(min((i-150)*6,37))
+            #os.system("ifconfig oaitun| grep 'inet ' | awk '{print $2}'")
         time.sleep(120)
         print("kill gnb")
         time.sleep(15)
@@ -233,7 +235,26 @@ def processDATA():
     global flag
     time.sleep(2)
 
+    # ul_snr_values_a = []
+    # ul_mcs_values_a = []
+    # dl_mcs_values_a = []
+    # ul_tpt_values_a = []
+    # dl_tpt_values_a = []
+    # ul_cqi_values_a = []
+
+    # ul_snr_ttis_a = []
+    # ul_mcs_ttis_a = []
+    # dl_mcs_ttis_a = []
+    # ul_tpt_ttis_a = []
+    # dl_tpt_ttis_a = []
+    # ul_cqi_ttis_a = []
+
+    
+
     for kk in range(1,int(sys.argv[1])+1):
+        os.system(f"mkdir ./plot/ue{kk}_{sys.argv[2]}")
+        os.system(f"cp ../../../logs/tti.txt ./plot/ue{kk}_{sys.argv[2]}/tti.txt")
+        os.system(f"cp ../../../logs/tti.txt ./plot/ue{kk}_{sys.argv[2]}/snr.txt")
         flag=1
         while flag == 1:
             time.sleep(2)
@@ -300,7 +321,24 @@ def processDATA():
         dl_tpt_ttis = []
         ul_cqi_ttis = []
 
-        ul_snr_values, ul_snr_values, ul_cqi_values, ul_cqi_ttis, ul_mcs_values, ul_mcs_ttis, dl_mcs_values, dl_mcs_ttis, ul_tpt_values, ul_tpt_ttis, dl_tpt_values, dl_tpt_ttis = read_more()
+
+        
+
+        ul_snr_values, ul_snr_values, ul_cqi_values, ul_cqi_ttis, ul_mcs_values, ul_mcs_ttis, dl_mcs_values, dl_mcs_ttis, ul_tpt_values, ul_tpt_ttis, dl_tpt_values, dl_tpt_ttis = read_more("../../../logs/snr.txt")
+
+        # ul_snr_values_a.append(ul_snr_values)
+        # ul_mcs_values_a.append(ul_mcs_values)
+        # dl_mcs_values_a.append(dl_mcs_values)
+        # ul_tpt_values_a.append(ul_tpt_values)
+        # dl_tpt_values_a.append(dl_tpt_values)
+        # ul_cqi_values_a.append(ul_cqi_values)
+
+        # ul_snr_ttis_a.append(ul_snr_ttis)
+        # ul_mcs_ttis_a.append(ul_mcs_ttis)
+        # dl_mcs_ttis_a.append(dl_mcs_ttis)
+        # ul_tpt_ttis_a.append(ul_tpt_ttis)
+        # dl_tpt_ttis_a.append(dl_tpt_ttis)
+        # ul_cqi_ttis_a.append(ul_cqi_ttis)
 
         # Plot on the second subplot (0, 1)
         ax2 = axes[0, 1]
@@ -401,6 +439,8 @@ def processDATA():
         # Displaying the plot
         plt.tight_layout()
         plt.show()
+
+        fig.savefig("plotting.png", format="png", dpi=150)
 
 if __name__ == "__main__":
     
