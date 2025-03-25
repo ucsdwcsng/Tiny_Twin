@@ -197,7 +197,8 @@ def create_docker(i):
 def autoUE():
     global flag
     flag=1
-    #os.system("docker exec -it oai-ext-dn iperf -s -i 1 -B 192.168.71.135")
+    os.system("docker compose -f ../../oai-cn/docker-compose.yaml up -d")
+    os.system("docker exec -d oai-ext-dn iperf -s -i 1 -B 192.168.71.135")
     for kk in range(1,int(sys.argv[1])+1):
         
         while flag == 0:
@@ -216,13 +217,20 @@ def autoUE():
         os.system(f"docker compose up -d tt-gnb")
         print("set up ran")
         time.sleep(15)
-        os.system(f"docker exec -it tt-gnb chmod +x run.sh ")
+        os.system(f"docker exec tt-gnb chmod +x run.sh ")
         #os.system(f"docker exec -d tt-gnb ./run.sh ")
-        #os.system(f"docker exec -d tt-gnb  cd /opt/tt-ran/tt/cmake_targets/ran_build/build/ && ./nr-softmodem -O /opt/tt-ran/tt/targets/PROJECTS/GENERIC-NR-5GC/CONF/gnb.sa.band78.fr1.106PRB.usrpb210.conf --rfsim -E --sa  --rfsimulator.options chanmod --TAP 1 --TTI 1 --SNR 1")
+        #os.system(f"docker exec -d tt-gnb  cd /opt/tt-ran/tt/cmake_targets/ran_build/build/ && ./nr-softmodem -O /opt/tt-ran/tt/targets/PROJECTS/GENERIC-NR-5GC/CONF/gnb.sa.band78.fr1.106PRB.usrpb210.conf --rfsim -E --sa  --rfsimulator.options chanmod --TAP 1 --TTI 1 --SNR 1 --MCS 1 --CQI 1 --TT 1")
         for i in range(151,151+kk):
             os.system(f"docker compose up -d tt-nrue{i}")
-            time.sleep(min((i-150)*6,37))
-            #os.system("ifconfig oaitun| grep 'inet ' | awk '{print $2}'")
+            time.sleep(min((i-150)*4+15,37))
+            #os.system(f"docker exec -it tt-ue{i} ifconfig oaitun_ue1| grep 'inet ' ")
+            os.system(f"docker exec -d tt-ue{i} iperf -t 86400 -i 1 -fk -c 192.168.71.135 -b 2M -B 10.0.0.{i-149} ")
+            os.system(f"docker exec -d tt-ue{i} iperf -s -u -i 1 -B 10.0.0.{i-149} ")
+            time.sleep(5)
+            os.system(f"docker exec -d oai-ext-dn iperf -u -t 86400 -i 1 -fk -B 192.168.71.135 -b 2M -c 10.0.0.{i-149}")
+
+
+
         time.sleep(120)
         print("kill gnb")
         time.sleep(15)
@@ -230,6 +238,8 @@ def autoUE():
         os.system(f"docker compose down")
 
         flag=0
+    os.system("docker compose -f ../../oai-cn/docker-compose.yaml down")
+    
 
 def processDATA():
     global flag
