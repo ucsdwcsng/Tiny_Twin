@@ -87,6 +87,76 @@ def read_exec(file_name):
                     print(f"Line {i} does not have 4 words")
     return float_values    
 
+def read_more(file_name):
+    ul_snr_values = []
+    ul_mcs_values = []
+    dl_mcs_values = []
+    ul_tpt_values = []
+    dl_tpt_values = []
+    ul_cqi_values = []
+
+    ul_snr_ttis = []
+    ul_mcs_ttis = []
+    dl_mcs_ttis = []
+    ul_tpt_ttis = []
+    dl_tpt_ttis = []
+    ul_cqi_ttis = []
+
+    previous_line = None
+
+    with open(file_name, 'r') as f:
+        for i, line in enumerate(f, start=1):
+            # if (i-1) % 2 == 0:
+            words = line.split()
+            if len(words) >= 1:
+                try:
+                    float_value = float(words[2])  # Convert the last word to float
+                    if words[0] == 'UL':
+                        # extra = float(words[3])
+                        if words[1] == 'SNR:':
+                            # refer to previous line
+                            if previous_line:
+                                ttis = previous_line.split()
+                                tti = int(ttis[2])
+                                ul_snr_ttis.append(tti)
+                            ul_snr_values.append(float_value)
+                        elif words[1] == 'MCS:':
+                            if previous_line:
+                                ttis = previous_line.split()
+                                tti = int(ttis[2])
+                                ul_mcs_ttis.append(tti)
+                            ul_mcs_values.append(float_value)
+                        elif words[1] == 'TPT:':
+                            if previous_line:
+                                ttis = previous_line.split()
+                                tti = int(ttis[2])
+                                ul_tpt_ttis.append(tti)
+                            ul_tpt_values.append(float_value)
+                        elif words[1] == 'CQI:':
+                            if previous_line:
+                                ttis = previous_line.split()
+                                tti = int(ttis[2])
+                                ul_cqi_ttis.append(tti)
+                            ul_cqi_values.append(float_value)
+                    elif words[0] == 'DL':
+                        if words[1] == 'MCS:':
+                            if previous_line:
+                                ttis = previous_line.split()
+                                tti = int(ttis[2])
+                                ul_mcs_ttis.append(tti)
+                            ul_mcs_values.append(float_value)
+
+                except ValueError:
+                    print(f"Cannot convert '{words[2]}' to float on line {i}")
+            else:
+                print(f"Line {i} does not have 4 words")
+            previous_line = line
+    return ul_snr_values, ul_snr_values, ul_cqi_values, ul_cqi_ttis, ul_mcs_values, ul_mcs_ttis, dl_mcs_values, dl_mcs_ttis, ul_tpt_values, ul_tpt_ttis, dl_tpt_values, dl_tpt_ttis
+
+def Convert(snr_ttis, snr_values):
+    res_dct = {snr_ttis[i]: snr_values[i] for i in range(len(snr_ttis))}
+    return res_dct
+
 def create_docker(i):
     template=f'''
     tt-nrue{i}:
@@ -105,7 +175,7 @@ def create_docker(i):
             - ../../../logs_ue:/opt/oai-nr-ue/etc/logs
         entrypoint: >
             /bin/bash -c "ls && cd tt/cmake_targets/ran_build/build/ &&
-            ./nr-uesoftmodem --uicc0.imsi 00101000000000{i-150} -C 3619200000 -r 106 --numerology 1 --ssb 516 -E --sa --rfsim --rfsimulator.options chanmod -O ../../../ci-scripts/conf_files/nrue.uicc.conf --TAP {sys.argv[2]} --rfsimulator.serveraddr 192.168.70.140 &&
+            ./nr-uesoftmodem --uicc0.imsi 00101000000000{i-150} -C 3619200000 -r 106 --numerology 1 --ssb 516 -E --sa --rfsim -O ../../../ci-scripts/conf_files/nrue.uicc.conf --TAP {sys.argv[2]} --rfsimulator.serveraddr 192.168.70.140 &&
             exec /bin/bash"
         # entrypoint: /bin/bash
         stdin_open: true  
@@ -151,7 +221,7 @@ def autoUE():
         for i in range(151,151+kk):
             os.system(f"docker compose up -d tt-nrue{i}")
             time.sleep(min((i-150)*6,37))
-        time.sleep(120)
+        time.sleep(1200)
         print("kill gnb")
         time.sleep(15)
 
@@ -168,55 +238,168 @@ def processDATA():
         while flag == 1:
             time.sleep(2)
 
-        ### @ALI: things to consider:
-        ### - this code block reads from a file saved from ending the execution of the gNB executable
-        ### - this plots a single TTI plot, if you want to compare with other TTI plots, this is very scalable
-
         # read from TTI file
         ### @ALI: change this to whatever file you would like to point
-        vals_1tap = read_starting("../../../logs/tti.txt")
-        diff_tti_xtap = [vals_1tap[i] - vals_1tap[i - 1] for i in range(1, len(vals_1tap))]
-        diff_tti_xtap = [diff_tti_1tap[i]/1000000000 for i in range(1, len(diff_tti_1tap))]
+        vals_tti = read_starting("../../../logs/tti.txt")
+        diff_tti = [vals_tti[i] - vals_tti[i - 1] for i in range(1, len(vals_tti))]
+        diff_tti = [diff_tti[i]/1000000000 for i in range(1, len(diff_tti))]
 
-        tti_1tap = np.array(diff_tti_1tap)
-        tti_1tap = [max(0, tti) for tti in tti_1tap]
+        tti = np.array(diff_tti)
+        tti = [max(0, tti_val) for tti_val in tti]
         # remove all zero values
-        tti_openmp = [tti for tti in tti_1tap if tti > 0]
-        mean_tti_1tap = np.mean(tti_1tap)
+        tti = [tti_val for tti_val in tti if tti_val > 0]
+        mean_tti = np.mean(tti)
 
         size = 100000
 
         # CCDFs of various TTI times across 100,000 instances
-        tti_1tap = tti_1tap[:size]
-        sorted_tti_1tap = np.sort(tti_1tap)
-        p1 = np.linspace(0, 1, len(tti_1tap))
+        tti = tti[:size]
+        sorted_tti = np.sort(tti)
+        p1 = np.linspace(0, 1, len(tti))
 
-        fig = plt.figure(figsize=(12, 8), dpi=150)
-        ax2 = fig.add_subplot(111) 
+        # 8 subplots
+        fig, axes = plt.subplots(2, 4, figsize=(20, 10), dpi=150)
 
         # plot CCDF
-        ax2.plot(sorted_tti_1tap, 1 - p1, label='1 Tap', linewidth=2)
+        ax1 = axes[0, 0]
+        ax1.plot(sorted_tti, 1 - p1, label='1 Tap', linewidth=2)
 
         # add a red vertical line at x=0.001 --> 3GPP TTI timing
-        ax2.axvline(x=0.001, color='red', linestyle='--', linewidth=2)
+        ax1.axvline(x=0.001, color='red', linestyle='--', linewidth=2)
 
-        ax2.set_xlabel('TTI Times (s)', fontsize=14)
-        ax2.set_ylabel('$CCDF$', fontsize=14)
-        ax2.set_title('TTI Variation With Number Of Taps (CCDF)', fontsize=16)
+        ax1.set_xlabel('TTI Times (s)', fontsize=14)
+        ax1.set_ylabel('$CCDF$', fontsize=14)
+        ax1.set_title('TTI Variation With Number Of Taps (CCDF)', fontsize=16)
 
         # Set x-axis limit
-        ax2.set_xlim(0, 0.01)
+        ax1.set_xlim(0, 0.01)
 
         # Customize the grid
-        ax2.grid(True, which='both', linestyle='--', linewidth=0.7, color='gray')
+        ax1.grid(True, which='both', linestyle='--', linewidth=0.7, color='gray')
 
         # Add minor ticks for a finer grid
-        ax2.minorticks_on()
-        ax2.grid(which='minor', linestyle=':', linewidth=0.5, color='lightgray')
+        ax1.minorticks_on()
+        ax1.grid(which='minor', linestyle=':', linewidth=0.5, color='lightgray')
 
-        ax2.legend()  # Add legend
+        ax1.legend()  # Add legend
 
         plt.savefig("tti_variation_ccdf.png", format="png", dpi=150)
+
+        ### read MAC metrics
+        ul_snr_values = []
+        ul_mcs_values = []
+        dl_mcs_values = []
+        ul_tpt_values = []
+        dl_tpt_values = []
+        ul_cqi_values = []
+
+        ul_snr_ttis = []
+        ul_mcs_ttis = []
+        dl_mcs_ttis = []
+        ul_tpt_ttis = []
+        dl_tpt_ttis = []
+        ul_cqi_ttis = []
+
+        ul_snr_values, ul_snr_values, ul_cqi_values, ul_cqi_ttis, ul_mcs_values, ul_mcs_ttis, dl_mcs_values, dl_mcs_ttis, ul_tpt_values, ul_tpt_ttis, dl_tpt_values, dl_tpt_ttis = read_more()
+
+        # Plot on the second subplot (0, 1)
+        ax2 = axes[0, 1]
+
+        ax2.plot(ul_mcs_values, label='UL MCS')
+        ax2.plot(dl_mcs_values, label='DL MCS')
+
+        # Adding labels and title
+        ax2.set_xlabel('(TTI) Index')
+        ax2.set_ylabel('MCS')
+        ax2.set_title('MCS Variation')
+
+        # Adding legend
+        ax2.legend()
+
+        # Displaying the plot
+        plt.tight_layout()
+        # plt.show()
+
+        # Plot on the third subplot (0, 2)
+        ax3 = axes[0, 2]
+
+        # Assuming tpt_ttis and tpt_values are already defined
+        ul_tpt = Convert(ul_tpt_ttis, ul_tpt_values)
+        dl_tpt = Convert(dl_tpt_ttis, dl_tpt_values)
+
+        WINDOW_SIZE = 1000
+        cumulative_tpt = 0
+        cumulative_ul_tpt_values = []
+
+        # Iterate through the keys of tpt
+        for key in ul_tpt:
+            cumulative_tpt += ul_tpt[key]
+            if key % WINDOW_SIZE == 0:
+                cumulative_ul_tpt_values.append(cumulative_tpt)
+                cumulative_tpt = 0
+
+        cumulative_tpt = 0
+        cumulative_dl_tpt_values = []
+
+        # Iterate through the keys of tpt
+        for key in dl_tpt:
+            cumulative_tpt += dl_tpt[key]
+            if key % WINDOW_SIZE == 0:
+                cumulative_dl_tpt_values.append(cumulative_tpt)
+                cumulative_tpt = 0        
+
+
+        # Plotting the cumulative TPT values
+        ax3.plot(cumulative_ul_tpt_values, label='UL TPT')
+        ax3.plot(cumulative_dl_tpt_values, label='DL TPT')
+
+        # Adding labels and title
+        ax3.set_xlabel('(TTI) Index')
+        ax3.set_ylabel('TPT')
+        ax3.set_title('UL and DL Traffic at capacity')
+
+        # Adding legend
+        ax3.legend()
+
+        # Displaying the plot
+        plt.tight_layout()
+        plt.show()
+
+        ## plot on the 4th subplot
+        ax4 = axes[0, 3]
+
+        # Plotting the cumulative CQI values
+        ax4.plot(ul_cqi_values, label='UL CQI')
+
+        # Adding labels and title
+        ax4.set_xlabel('(TTI) Index')
+        ax4.set_ylabel('CQI')
+        ax4.set_title('UL CQI Variation')
+
+        # Adding legend
+        ax4.legend()
+
+        # Displaying the plot
+        plt.tight_layout()
+        plt.show()
+
+        ## plot 5th subplot
+
+        ax5 = axes[1, 0]
+
+        # Plotting the cumulative SNR values
+        ax5.plot(ul_snr_values, label='UL SNR')
+
+        # Adding labels and title
+        ax5.set_xlabel('(TTI) Index')
+        ax5.set_ylabel('SNR')
+        ax5.set_title('UL SNR Variation')
+
+        # Adding legend
+        ax5.legend()
+
+        # Displaying the plot
+        plt.tight_layout()
         plt.show()
 
 if __name__ == "__main__":
