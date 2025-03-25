@@ -3,6 +3,8 @@ import os
 import time
 import threading
 import numpy as np
+import matplotlib
+matplotlib.use('Agg')
 import matplotlib.pyplot as plt 
 
 start='''
@@ -228,7 +230,7 @@ def autoUE():
         #os.system(f"docker exec -d tt-gnb  cd /opt/tt-ran/tt/cmake_targets/ran_build/build/ && ./nr-softmodem -O /opt/tt-ran/tt/targets/PROJECTS/GENERIC-NR-5GC/CONF/gnb.sa.band78.fr1.106PRB.usrpb210.conf --rfsim -E --sa  --rfsimulator.options chanmod --TAP 1 --TTI 1 --SNR 1 --MCS 1 --CQI 1 --TPT 1")
         for i in range(151,151+kk):
             os.system(f"docker compose up -d tt-nrue{i}")
-            time.sleep(min((i-150)*4+15,37))
+            time.sleep(min((i-150)*4+25,37))
             #os.system(f"docker exec -it tt-ue{i} ifconfig oaitun_ue1| grep 'inet ' ")
             os.system(f"docker exec -d tt-ue{i} iperf -t 86400 -i 1 -fk -c 192.168.71.135 -b 2M -B 10.0.0.{i-149} ")
             os.system(f"docker exec -d tt-ue{i} iperf -s -u -i 1 -B 10.0.0.{i-149} ")
@@ -356,8 +358,8 @@ def processDATA():
         # Plot on the second subplot (0, 1)
         ax2 = axes[0, 1]
 
-        ax2.plot(ul_mcs_values, label='UL MCS')
-        ax2.plot(dl_mcs_values, label='DL MCS')
+        ax2.plot(ul_mcs_ttis, ul_mcs_values, label='UL MCS')
+        ax2.plot(dl_mcs_ttis, dl_mcs_values, label='DL MCS')
 
         # Adding labels and title
         ax2.set_xlabel('(TTI) Index')
