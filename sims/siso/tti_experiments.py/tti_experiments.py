@@ -175,7 +175,7 @@ def create_docker(i):
             - ../../../logs_ue:/opt/oai-nr-ue/etc/logs
         entrypoint: >
             /bin/bash -c "ls && cd tt/cmake_targets/ran_build/build/ &&
-            ./nr-uesoftmodem --uicc0.imsi 00101000000000{i-150} -C 3619200000 -r 106 --numerology 1 --ssb 516 -E --sa --rfsim -O ../../../ci-scripts/conf_files/nrue.uicc.conf --TAP {sys.argv[2]} --rfsimulator.serveraddr 192.168.70.140 &&
+            ./nr-uesoftmodem --uicc0.imsi 00101000000000{i-150} -C 3619200000 -r 106 --numerology 1 --ssb 516 -E --sa --rfsim --rfsimulator.options chanmod -O ../../../ci-scripts/conf_files/nrue.uicc.conf --TAP {sys.argv[2]} --rfsimulator.serveraddr 192.168.70.140 &&
             exec /bin/bash"
         # entrypoint: /bin/bash
         stdin_open: true  
@@ -221,7 +221,7 @@ def autoUE():
         for i in range(151,151+kk):
             os.system(f"docker compose up -d tt-nrue{i}")
             time.sleep(min((i-150)*6,37))
-        time.sleep(1200)
+        time.sleep(120)
         print("kill gnb")
         time.sleep(15)
 
