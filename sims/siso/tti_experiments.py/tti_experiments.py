@@ -146,12 +146,12 @@ def autoUE():
         print("set up ran")
         time.sleep(15)
         os.system(f"docker exec -it tt-gnb chmod +x run.sh ")
-        os.system(f"docker exec -d tt-gnb ./run.sh ")
+        #os.system(f"docker exec -d tt-gnb ./run.sh ")
         #os.system(f"docker exec -d tt-gnb  cd /opt/tt-ran/tt/cmake_targets/ran_build/build/ && ./nr-softmodem -O /opt/tt-ran/tt/targets/PROJECTS/GENERIC-NR-5GC/CONF/gnb.sa.band78.fr1.106PRB.usrpb210.conf --rfsim -E --sa  --rfsimulator.options chanmod --TAP 1 --TTI 1 --SNR 1")
         for i in range(151,151+kk):
             os.system(f"docker compose up -d tt-nrue{i}")
             time.sleep(min((i-150)*6,37))
-        time.sleep(15)
+        time.sleep(120)
         print("kill gnb")
         time.sleep(15)
 
@@ -175,9 +175,13 @@ def processDATA():
         # read from TTI file
         ### @ALI: change this to whatever file you would like to point
         vals_1tap = read_starting("../../../logs/tti.txt")
-        diff_tti_1tap = [vals_1tap[i] - vals_1tap[i - 1] for i in range(1, len(vals_1tap))]
+        diff_tti_xtap = [vals_1tap[i] - vals_1tap[i - 1] for i in range(1, len(vals_1tap))]
+        diff_tti_xtap = [diff_tti_1tap[i]/1000000000 for i in range(1, len(diff_tti_1tap))]
 
         tti_1tap = np.array(diff_tti_1tap)
+        tti_1tap = [max(0, tti) for tti in tti_1tap]
+        # remove all zero values
+        tti_openmp = [tti for tti in tti_1tap if tti > 0]
         mean_tti_1tap = np.mean(tti_1tap)
 
         size = 100000
