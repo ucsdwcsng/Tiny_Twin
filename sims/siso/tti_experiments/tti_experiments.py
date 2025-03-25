@@ -143,8 +143,14 @@ def read_more(file_name):
                             if previous_line:
                                 ttis = previous_line.split()
                                 tti = int(ttis[2])
-                                ul_mcs_ttis.append(tti)
-                            ul_mcs_values.append(float_value)
+                                dl_mcs_ttis.append(tti)
+                            dl_mcs_values.append(float_value)
+                        elif words[1] == 'TPT:':
+                            if previous_line:
+                                ttis = previous_line.split()
+                                tti = int(ttis[2])
+                                dl_tpt_ttis.append(tti)
+                            dl_tpt_values.append(float_value)
 
                 except ValueError:
                     print(f"Cannot convert '{words[-1]}' to float on line {i}")
@@ -331,9 +337,6 @@ def processDATA():
         dl_tpt_ttis = []
         ul_cqi_ttis = []
 
-
-        
-
         ul_snr_values, ul_snr_values, ul_cqi_values, ul_cqi_ttis, ul_mcs_values, ul_mcs_ttis, dl_mcs_values, dl_mcs_ttis, ul_tpt_values, ul_tpt_ttis, dl_tpt_values, dl_tpt_ttis = read_more("../../../logs/snr.txt")
 
         # ul_snr_values_a.append(ul_snr_values)
@@ -410,7 +413,7 @@ def processDATA():
         ax3.legend()
 
         # Displaying the plot
-        plt.tight_layout()
+        # plt.tight_layout()
         # plt.show()
 
         ## plot on the 4th subplot
