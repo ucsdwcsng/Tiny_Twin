@@ -742,9 +742,9 @@ static void pf_dl(module_id_t module_id,
 
       // // log DL MCS // //
       if (mcslog){
-        fprintf(fprsrp, "TTI Count: %d\n", tti_counter);
-        fprintf(fprsrp, "DL MCS: %d\n", sched_ctrl->dl_bler_stats.mcs);  
-        fprintf(fprsrp, "DL BLER_LB : %f\n", sched_ctrl->dl_bler_stats.bler);  
+        fprintf(fpsnr, "TTI Count: %d\n", tti_counter);
+        fprintf(fpsnr, "DL MCS: %d\n", sched_ctrl->dl_bler_stats.mcs);  
+        fprintf(fpsnr, "DL BLER_LB : %f\n", sched_ctrl->dl_bler_stats.bler);  
       }
 
       sched_pdsch->nrOfLayers = get_dl_nrOfLayers(sched_ctrl, current_BWP->dci_format);
