@@ -233,7 +233,7 @@ void rxAddInput(const c16_t *input_sig,
   int chunk = 100;
   // X*H*N/threads;
 
-  #pragma omp parallel for schedule(guided, chunk) num_threads(threads)
+  // #pragma omp parallel for schedule(guided, chunk) num_threads(threads)
   for (int i=0; i<nbSamples; i++) {
    
     struct complex16 *out_ptr=after_channel_sig+i;
