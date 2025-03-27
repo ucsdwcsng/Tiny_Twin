@@ -657,6 +657,14 @@ static void pf_dl(module_id_t module_id,
 
   /* Loop UE_info->list to check retransmission */
   UE_iterator(UE_list, UE) {
+    // log whether or not an ACK was receieved from a certain UE
+    if (tptlog){
+        int ack = (UE->Msg4_MsgB_ACKed) ? 1 : 0;
+        fprintf(fpsnr, "TTI Count: %d\n", tti_counter);
+        // fprintf(fpsnr, "DL TPT: %f\n", UE->dl_thr_ue);  
+        fprintf(fpsnr, "DL ACK: %d RNTI: %04x\n", ack, UE->rnti);
+        // fprintf(fpsnr, "DL MAC-ReTx: %d\n", sched_pdsch->dl_harq_pid);
+    }
     if (!UE->Msg4_MsgB_ACKed)
       continue;
 
@@ -679,21 +687,25 @@ static void pf_dl(module_id_t module_id,
     if (snrlog){
       if (sched_ctrl != NULL) {
         fprintf(fpsnr, "TTI Index: %d\n", tti_counter);
-        fprintf(fpsnr, "UL SNR: %f\n", (float)(sched_ctrl->pusch_snrx10 / 10.0)); 
-        fprintf(fpsnr, "UL ReTx: %d\n", sched_pdsch->dl_harq_pid);
+        // fprintf(fpsnr, "UL SNR: %f, "RNTI: %04x\n", (float)(sched_ctrl->pusch_snrx10 / 10.0)); 
+        fprintf(fpsnr, "UL SNR: %f RNTI: %04x\n", (float)(sched_ctrl->pusch_snrx10 / 10.0), UE->rnti);
+        // fprintf(fpsnr, "UL ReTx: %d\n", sched_pdsch->dl_harq_pid);
       }
     }
 
     // log CQI //
     // if (cqilog){
-    //     fprintf(fpcqi, "DL CQI: %d\n", sched_ctrl->CSI_report.cri_ri_li_pmi_cqi_report.wb_cqi_2tb);  
+    //     
     // }
+
+    // fprintf(fplog3, "TTI Count: %d\n", tti_counter);
+    // fprintf(fplog3, "DL CQI: %d\n", sched_ctrl->CSI_report.cri_ri_li_pmi_cqi_report.wb_cqi_1tb);  
 
     // // log DL TPT // //
     if (tptlog){
         fprintf(fpsnr, "TTI Count: %d\n", tti_counter);
-        fprintf(fpsnr, "DL TPT: %f\n", UE->dl_thr_ue);  
-        fprintf(fpsnr, "DL MAC-ReTx: %d\n", sched_pdsch->dl_harq_pid);
+        // fprintf(fpsnr, "DL TPT: %f\n", UE->dl_thr_ue);  
+        fprintf(fpsnr, "DL TPT: %f RNTI: %04x\n", UE->dl_thr_ue, UE->rnti);
     }
 
     if (remainUEs == 0)
@@ -743,8 +755,9 @@ static void pf_dl(module_id_t module_id,
       // // log DL MCS // //
       if (mcslog){
         fprintf(fpsnr, "TTI Count: %d\n", tti_counter);
-        fprintf(fpsnr, "DL MCS: %d\n", sched_ctrl->dl_bler_stats.mcs);  
-        fprintf(fpsnr, "DL BLER_LB : %f\n", sched_ctrl->dl_bler_stats.bler);  
+        // fprintf(fpsnr, "DL MCS: %d\n", sched_ctrl->dl_bler_stats.mcs);  
+        fprintf(fpsnr, "DL MCS: %d RNTI: %04x\n", sched_ctrl->dl_bler_stats.mcs, UE->rnti);
+        // fprintf(fpsnr, "DL BLER_LB: %f\n", sched_ctrl->dl_bler_stats.bler);  
       }
 
       sched_pdsch->nrOfLayers = get_dl_nrOfLayers(sched_ctrl, current_BWP->dci_format);

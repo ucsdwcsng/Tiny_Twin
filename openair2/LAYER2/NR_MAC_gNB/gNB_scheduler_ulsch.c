@@ -752,7 +752,9 @@ static void _nr_rx_sdu(const module_id_t gnb_mod_idP,
 
     if (cqilog){
         fprintf(fpsnr, "TTI Index: %d\n", tti_counter);
-        fprintf(fpsnr, "UL CQI: %d\n", ul_cqi);  
+        // fprintf(fpsnr, "UL CQI: %04x RNTI %d\n", UE->rnti, ul_cqi);  
+        fprintf(fpsnr, "UL CQI: %d RNTI: %04x\n", ul_cqi, UE->rnti);
+        
     }
 
       if (UE_scheduling_control->tpc0 > 1)
@@ -1817,6 +1819,15 @@ static void pf_ul(module_id_t module_id,
   /* Loop UE_list to calculate throughput and coeff */
   UE_iterator(UE_list, UE) {
 
+    // log whether or not an ACK was receieved from a certain UE
+    if (tptlog){
+        int ack = (UE->Msg4_MsgB_ACKed) ? 1 : 0;
+        fprintf(fpsnr, "TTI Count: %d\n", tti_counter);
+        // fprintf(fpsnr, "DL TPT: %f\n", UE->dl_thr_ue);  
+        fprintf(fpsnr, "UL ACK: %d RNTI: %04x\n", ack, UE->rnti);
+        // fprintf(fpsnr, "DL MAC-ReTx: %d\n", sched_pdsch->dl_harq_pid);
+    }
+
     NR_UE_sched_ctrl_t *sched_ctrl = &UE->UE_sched_ctrl;
     if (!UE->Msg4_MsgB_ACKed || sched_ctrl->ul_failure)
       continue;
@@ -1835,12 +1846,13 @@ static void pf_ul(module_id_t module_id,
     const uint32_t b = stats->current_bytes;
     UE->ul_thr_ue = (1 - a) * UE->ul_thr_ue + a * b;
 
-  // // log UL TPT // //
-  if (tptlog){
-      fprintf(fpsnr, "TTI Index: %d\n", tti_counter);
-      fprintf(fpsnr, "UL TPT: %f\n", UE->ul_thr_ue);  
-      // fprintf(fpultpt, "UL ReTx: %d\n", sched_ctrl->retrans_ul_harq.head);
-  }
+    // // log UL TPT // //
+    if (tptlog){
+        fprintf(fpsnr, "TTI Index: %d\n", tti_counter);
+        // fprintf(fpsnr, "UL TPT: %f\n", UE->ul_thr_ue);  
+        fprintf(fpsnr, "UL TPT: %f RNTI: %04x\n", UE->ul_thr_ue, UE->rnti);
+        // fprintf(fpultpt, "UL ReTx: %d\n", sched_ctrl->retrans_ul_harq.head);
+    }
 
     if(remainUEs == 0)
       continue;
@@ -1900,7 +1912,8 @@ static void pf_ul(module_id_t module_id,
     // // log UL MCS // //
     if (mcslog){
         fprintf(fpsnr, "TTI Index: %d\n", tti_counter);
-        fprintf(fpsnr, "UL MCS: %d\n", sched_pusch->mcs);  
+        fprintf(fpsnr, "UL MCS: %d RNTI: %04x\n", sched_pusch->mcs, UE->rnti);
+        // fprintf(fpsnr, "UL MCS: %d\n", sched_pusch->mcs);  
     }
 
     /* Schedule UE on SR or UL inactivity and no data (otherwise, will be scheduled

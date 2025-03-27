@@ -90,12 +90,17 @@ def read_exec(file_name):
     return float_values    
 
 def read_more(file_name):
+
+    all_vals = {}
+
     ul_snr_values = []
     ul_mcs_values = []
     dl_mcs_values = []
     ul_tpt_values = []
     dl_tpt_values = []
     ul_cqi_values = []
+    ul_ack_values = []
+    dl_ack_values = []
 
     ul_snr_ttis = []
     ul_mcs_ttis = []
@@ -103,6 +108,15 @@ def read_more(file_name):
     ul_tpt_ttis = []
     dl_tpt_ttis = []
     ul_cqi_ttis = []
+    ul_ack_ttis = []
+    dl_ack_ttis = []
+
+    all_metrics = [
+    ul_snr_values, ul_mcs_values, dl_mcs_values, ul_tpt_values, dl_tpt_values,
+    ul_cqi_values, ul_ack_values, dl_ack_values,
+    ul_snr_ttis, ul_mcs_ttis, dl_mcs_ttis, ul_tpt_ttis, dl_tpt_ttis,
+    ul_cqi_ttis, ul_ack_ttis, dl_ack_ttis
+    ]
 
     previous_line = None
 
@@ -110,56 +124,93 @@ def read_more(file_name):
         for i, line in enumerate(f, start=1):
             # if (i-1) % 2 == 0:
             words = line.split()
-            if len(words) >= 1:
+            if len(words) >= 3:
                 try:
-                    float_value = float(words[-1])  # Convert the last word to float
+                    float_value = float(words[2])  # Convert the last word to float
                     if words[0] == 'UL':
-                        # extra = float(words[3])
+                        rnti = words[-1]
+                        if rnti not in all_vals.keys():
+                            # all_vals[rnti] = {name: [] for name in all_metrics}  # Initialize metric lists
+                            all_vals[rnti] = {name: [] for name in [
+                                'ul_snr_values', 'ul_mcs_values', 'dl_mcs_values', 'ul_tpt_values', 'dl_tpt_values',
+                                'ul_cqi_values', 'ul_ack_values', 'dl_ack_values',
+                                'ul_snr_ttis', 'ul_mcs_ttis', 'dl_mcs_ttis', 'ul_tpt_ttis', 'dl_tpt_ttis',
+                                'ul_cqi_ttis', 'ul_ack_ttis', 'dl_ack_ttis'
+                            ]}  # Initialize metric lists
+                        
+                        # while(1){    
+                        #     rnti = float(words[4])
+                        #     if rnti in all_vals.keys():
+                        #         break
+                        #     else:
+                        #         all_vals[rnti] = {name: [] for name in all_metrics}    
+                        # }
+
                         if words[1] == 'SNR:':
                             # refer to previous line
                             if previous_line:
                                 ttis = previous_line.split()
                                 tti = int(ttis[2])
-                                ul_snr_ttis.append(tti)
-                            ul_snr_values.append(float_value)
+                                all_vals[rnti]['ul_snr_ttis'].append(tti)
+                            all_vals[rnti]['ul_snr_values'].append(float_value)
                         elif words[1] == 'MCS:':
                             if previous_line:
                                 ttis = previous_line.split()
                                 tti = int(ttis[2])
-                                ul_mcs_ttis.append(tti)
-                            ul_mcs_values.append(float_value)
+                                all_vals[rnti]['ul_mcs_ttis'].append(tti)
+                            all_vals[rnti]['ul_mcs_values'].append(float_value)
                         elif words[1] == 'TPT:':
                             if previous_line:
                                 ttis = previous_line.split()
                                 tti = int(ttis[2])
-                                ul_tpt_ttis.append(tti)
-                            ul_tpt_values.append(float_value)
+                                all_vals[rnti]['ul_tpt_ttis'].append(tti)
+                            all_vals[rnti]['ul_tpt_values'].append(float_value)
                         elif words[1] == 'CQI:':
                             if previous_line:
                                 ttis = previous_line.split()
                                 tti = int(ttis[2])
-                                ul_cqi_ttis.append(tti)
-                            ul_cqi_values.append(float_value)
+                                all_vals[rnti]['ul_cqi_ttis'].append(tti)
+                            all_vals[rnti]['ul_cqi_values'].append(float_value)
+                        elif words[1] == 'ACK:':
+                            if previous_line:
+                                ttis = previous_line.split()
+                                tti = int(ttis[2])
+                                all_vals[rnti]['ul_ack_ttis'].append(tti)
+                            all_vals[rnti]['ul_ack_values'].append(float_value)
                     elif words[0] == 'DL':
+                        rnti = words[-1]
+                        if rnti not in all_vals.keys():
+                            all_vals[rnti] = {name: [] for name in [
+                                'ul_snr_values', 'ul_mcs_values', 'dl_mcs_values', 'ul_tpt_values', 'dl_tpt_values',
+                                'ul_cqi_values', 'ul_ack_values', 'dl_ack_values',
+                                'ul_snr_ttis', 'ul_mcs_ttis', 'dl_mcs_ttis', 'ul_tpt_ttis', 'dl_tpt_ttis',
+                                'ul_cqi_ttis', 'ul_ack_ttis', 'dl_ack_ttis'
+                            ]}  # Initialize metric lists
                         if words[1] == 'MCS:':
                             if previous_line:
                                 ttis = previous_line.split()
                                 tti = int(ttis[2])
-                                dl_mcs_ttis.append(tti)
-                            dl_mcs_values.append(float_value)
+                                all_vals[rnti]['dl_mcs_ttis'].append(tti)
+                            all_vals[rnti]['dl_mcs_values'].append(float_value)
                         elif words[1] == 'TPT:':
                             if previous_line:
                                 ttis = previous_line.split()
                                 tti = int(ttis[2])
-                                dl_tpt_ttis.append(tti)
-                            dl_tpt_values.append(float_value)
-
+                                all_vals[rnti]['dl_tpt_ttis'].append(tti)
+                            all_vals[rnti]['dl_tpt_values'].append(float_value)
+                        elif words[1] == 'ACK:':
+                            if previous_line:
+                                ttis = previous_line.split()
+                                tti = int(ttis[2])
+                                all_vals[rnti]['dl_ack_ttis'].append(tti)
+                            all_vals[rnti]['dl_ack_values'].append(float_value)
                 except ValueError:
                     print(f"Cannot convert '{words[-1]}' to float on line {i}")
             else:
-                print(f"Line {i} does not have 4 words")
+                print(f"Line {i} does not have 1 word...")
             previous_line = line
-    return ul_snr_values, ul_snr_values, ul_cqi_values, ul_cqi_ttis, ul_mcs_values, ul_mcs_ttis, dl_mcs_values, dl_mcs_ttis, ul_tpt_values, ul_tpt_ttis, dl_tpt_values, dl_tpt_ttis
+    # return ul_snr_values, ul_snr_values, ul_cqi_values, ul_cqi_ttis, ul_mcs_values, ul_mcs_ttis, dl_mcs_values, dl_mcs_ttis, ul_tpt_values, ul_tpt_ttis, dl_tpt_values, dl_tpt_ttis, ul_ack_values, ul_ack_ttis, dl_ack_values, dl_ack_ttis
+    return all_vals
 
 def Convert(snr_ttis, snr_values):
     res_dct = {snr_ttis[i]: snr_values[i] for i in range(len(snr_ttis))}
@@ -239,7 +290,7 @@ def autoUE():
 
 
         #test
-        time.sleep(120)
+        time.sleep(30)
         print("kill gnb")
         time.sleep(15)
 
@@ -267,12 +318,8 @@ def processDATA():
     # dl_tpt_ttis_a = []
     # ul_cqi_ttis_a = []
 
-    
-
     for kk in range(1,int(sys.argv[1])+1):
-        os.system(f"mkdir ./plot/ue{kk}_{sys.argv[2]}")
-        os.system(f"cp ../../../logs/tti.txt ./plot/ue{kk}_{sys.argv[2]}/tti.txt")
-        os.system(f"cp ../../../logs/tti.txt ./plot/ue{kk}_{sys.argv[2]}/snr.txt")
+
         flag=1
         while flag == 1:
             time.sleep(2)
@@ -325,21 +372,23 @@ def processDATA():
         plt.savefig("tti_variation_ccdf.png", format="png", dpi=150)
 
         ### read MAC metrics
-        ul_snr_values = []
-        ul_mcs_values = []
-        dl_mcs_values = []
-        ul_tpt_values = []
-        dl_tpt_values = []
-        ul_cqi_values = []
+        # define all_vals
 
-        ul_snr_ttis = []
-        ul_mcs_ttis = []
-        dl_mcs_ttis = []
-        ul_tpt_ttis = []
-        dl_tpt_ttis = []
-        ul_cqi_ttis = []
+        # ul_snr_values = []
+        # ul_mcs_values = []
+        # dl_mcs_values = []
+        # ul_tpt_values = []
+        # dl_tpt_values = []
+        # ul_cqi_values = []
 
-        ul_snr_values, ul_snr_values, ul_cqi_values, ul_cqi_ttis, ul_mcs_values, ul_mcs_ttis, dl_mcs_values, dl_mcs_ttis, ul_tpt_values, ul_tpt_ttis, dl_tpt_values, dl_tpt_ttis = read_more("../../../logs/snr.txt")
+        # ul_snr_ttis = []
+        # ul_mcs_ttis = []
+        # dl_mcs_ttis = []
+        # ul_tpt_ttis = []
+        # dl_tpt_ttis = []
+        # ul_cqi_ttis = []
+
+        all_vals = read_more("../../../logs/snr.txt")
 
         # ul_snr_values_a.append(ul_snr_values)
         # ul_mcs_values_a.append(ul_mcs_values)
@@ -358,8 +407,9 @@ def processDATA():
         # Plot on the second subplot (0, 1)
         ax2 = axes[0, 1]
 
-        ax2.plot(ul_mcs_ttis, ul_mcs_values, label='UL MCS')
-        ax2.plot(dl_mcs_ttis, dl_mcs_values, label='DL MCS')
+        for rnti in all_vals.keys():
+            ax2.plot(all_vals[rnti]['ul_mcs_ttis'], all_vals[rnti]['ul_mcs_values'], label=f'{rnti} UL MCS')
+            ax2.plot(all_vals[rnti]['dl_mcs_ttis'], all_vals[rnti]['dl_mcs_values'], label=f'{rnti} DL MCS')
 
         # Adding labels and title
         ax2.set_xlabel('(TTI) Index')
@@ -370,92 +420,137 @@ def processDATA():
         ax2.legend()
 
         # Displaying the plot
-        plt.tight_layout()
-        # plt.show()
-
-        # Plot on the third subplot (0, 2)
-        ax3 = axes[0, 2]
-
-        # Assuming tpt_ttis and tpt_values are already defined
-        ul_tpt = Convert(ul_tpt_ttis, ul_tpt_values)
-        dl_tpt = Convert(dl_tpt_ttis, dl_tpt_values)
-
-        WINDOW_SIZE = 1000
-        cumulative_tpt = 0
-        cumulative_ul_tpt_values = []
-
-        # Iterate through the keys of tpt
-        for key in ul_tpt:
-            cumulative_tpt += ul_tpt[key]
-            if key % WINDOW_SIZE == 0:
-                cumulative_ul_tpt_values.append(cumulative_tpt)
-                cumulative_tpt = 0
-
-        cumulative_tpt = 0
-        cumulative_dl_tpt_values = []
-
-        # Iterate through the keys of tpt
-        for key in dl_tpt:
-            cumulative_tpt += dl_tpt[key]
-            if key % WINDOW_SIZE == 0:
-                cumulative_dl_tpt_values.append(cumulative_tpt)
-                cumulative_tpt = 0        
-
-
-        # Plotting the cumulative TPT values
-        ax3.plot(cumulative_ul_tpt_values, label='UL TPT')
-        ax3.plot(cumulative_dl_tpt_values, label='DL TPT')
-
-        # Adding labels and title
-        ax3.set_xlabel('(TTI) Index')
-        ax3.set_ylabel('TPT')
-        ax3.set_title('UL and DL Traffic at capacity')
-
-        # Adding legend
-        ax3.legend()
-
-        # Displaying the plot
         # plt.tight_layout()
         # plt.show()
 
-        ## plot on the 4th subplot
+        cumulative_dl_tpt_values = []
+        cumulative_ul_tpt_values = []
+
+        # # Plot on the third subplot (0, 2)
+        # ax3 = axes[0, 2]
+        
+        # # ul_cumulative = []
+        # # dl_cumulative = []
+        # # for rnti in all_vals.keys():
+        # #     # Assuming tpt_ttis and tpt_values are already defined
+        # #     ul_tpt = Convert(all_vals[rnti]['ul_tpt_ttis'], all_vals[rnti]['ul_tpt_values'])
+        # #     dl_tpt = Convert(all_vals[rnti]['dl_tpt_ttis'], all_vals[rnti]['dl_tpt_values'])
+
+        # WINDOW_SIZE = 1000
+        # cumulative_tpt = 0
+
+        # # Iterate through the keys of tpt
+        # for key in ul_tpt:
+        #     for rnti in 
+        #     cumulative_tpt += ul_tpt[key]
+        #     if key % WINDOW_SIZE == 0:
+        #         cumulative_ul_tpt_values.append(cumulative_tpt)
+        #         cumulative_tpt = 0
+
+        #     cumulative_tpt = 0
+
+        #     # Iterate through the keys of tpt
+        #     for key in dl_tpt:
+        #         cumulative_tpt += dl_tpt[key]
+        #         if key % WINDOW_SIZE == 0:
+        #             cumulative_dl_tpt_values.append(cumulative_tpt)
+        #             cumulative_tpt = 0   
+
+
+
+
+        # # Plotting the cumulative TPT values
+        # ax3.plot(ul, label='UL TPT')
+        # ax3.plot(dl, label='DL TPT')
+
+        # # Adding labels and title
+        # ax3.set_xlabel('(TTI) Index')
+        # ax3.set_ylabel('TPT')
+        # ax3.set_title('UL and DL Traffic at capacity')
+
+        # # Adding legend
+        # ax3.legend()
+
+        # plotting on the fourth plot
         ax4 = axes[0, 3]
 
-        # Plotting the cumulative CQI values
-        ax4.plot(ul_cqi_values, label='UL CQI')
+        for rnti in all_vals.keys():
+            ax4.plot(all_vals[rnti]['ul_tpt_ttis'], all_vals[rnti]['ul_tpt_values'], label=f'{rnti} UL TPT')
+            ax4.plot(all_vals[rnti]['dl_tpt_ttis'], all_vals[rnti]['dl_tpt_values'], label=f'{rnti} DL TPT')
 
         # Adding labels and title
         ax4.set_xlabel('(TTI) Index')
-        ax4.set_ylabel('CQI')
-        ax4.set_title('UL CQI Variation')
+        ax4.set_ylabel('Bytes')
+        ax4.set_title('Per UE Throughput Variation')
 
         # Adding legend
         ax4.legend()
 
-        # Displaying the plot
-        plt.tight_layout()
-        # plt.show()
-
-        ## plot 5th subplot
-
+        ## plot on the 5th subplot
         ax5 = axes[1, 0]
 
-        # Plotting the cumulative SNR values
-        ax5.plot(ul_snr_values, label='UL SNR')
+        # Plotting the cumulative CQI values
+        for rnti in all_vals.keys():
+            ax5.plot(all_vals[rnti]['ul_cqi_ttis'], all_vals[rnti]['ul_cqi_values'], label=f'{rnti} UL CQI')
 
         # Adding labels and title
         ax5.set_xlabel('(TTI) Index')
-        ax5.set_ylabel('SNR')
-        ax5.set_title('UL SNR Variation')
+        ax5.set_ylabel('CQI')
+        ax5.set_title('UL CQI Variation')
 
         # Adding legend
         ax5.legend()
 
         # Displaying the plot
-        plt.tight_layout()
+        # plt.tight_layout()
+        # plt.show()
+
+        ## plot 6th subplot
+        ax6 = axes[1, 1]
+
+        # Plotting the cumulative SNR values
+        for rnti in all_vals.keys():
+            ax6.plot(all_vals[rnti]['ul_snr_ttis'], all_vals[rnti]['ul_snr_values'], label=f'{rnti} UL SNR')
+            # ax5.plot(ul_snr_values, label='UL SNR')
+
+        # Adding labels and title
+        ax6.set_xlabel('(TTI) Index')
+        ax6.set_ylabel('SNR')
+        ax6.set_title('UL SNR Variation')
+
+        # Adding legend
+        ax6.legend()
+
+        # Displaying the plot
+        # plt.tight_layout()
+        # plt.show()
+
+        ## plot 6th subplot
+        ax7 = axes[1, 2]
+
+        # Plotting the ACK status
+        for rnti in all_vals.keys():
+            ax7.plot(all_vals[rnti]['ul_ack_ttis'], all_vals[rnti]['ul_ack_values'], label=f'{rnti} UL ACKs')
+            ax7.plot(all_vals[rnti]['dl_ack_ttis'], all_vals[rnti]['dl_ack_values'], label=f'{rnti} DL ACKs')
+
+        # Adding labels and title
+        ax7.set_xlabel('(TTI) Index')
+        ax7.set_ylabel('ACKs')
+        ax7.set_title('ACK Status')
+
+        # Adding legend
+        ax7.legend()
+
+        # Displaying the plot
+        # plt.tight_layout()
         # plt.show()
 
         fig.savefig("plotting.png", format="png", dpi=150)
+
+        os.system(f"mkdir ./plot/ue{kk}_{sys.argv[2]}")
+        os.system(f"cp ../../../logs/tti.txt ./plot/ue{kk}_{sys.argv[2]}/tti.txt")
+        os.system(f"cp ../../../logs/snr.txt ./plot/ue{kk}_{sys.argv[2]}/snr.txt")
+        os.system(f"cp plotting.png ./plot/ue{kk}_{sys.argv[2]}/plotting.png")
 
 if __name__ == "__main__":
     
