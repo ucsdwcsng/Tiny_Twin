@@ -6,12 +6,8 @@ import numpy as np
 import matplotlib
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt 
-<<<<<<< HEAD
 start_ue = int(sys.argv[1])
 end_ue = int(sys.argv[1])
-=======
-
->>>>>>> 1de0aa1fabc135914cd0959f8bd3be02123199ae
 start='''
 services:
     tt-gnb:
@@ -29,10 +25,6 @@ services:
             - ../../../channel/channel.txt:/opt/tt-ran/tt/channel/channel_gradual.txt
             - ../../../logs_gnb:/opt/tt-ran/etc/logs
             - ./run.sh:/opt/tt-ran/run.sh
-<<<<<<< HEAD
-            - ./build.sh:/opt/tt-ran/build.sh
-=======
->>>>>>> 1de0aa1fabc135914cd0959f8bd3be02123199ae
             - ./stop.sh:/opt/tt-ran/stop.sh
         # environment:
         #     USE_ADDITIONAL_OPTIONS: --rfsim -E --sa --rfsimulator.options chanmod -T 10 -O /opt/oai-gnb/etc/gnb.conf
@@ -267,12 +259,7 @@ def autoUE():
     global flag
     flag=1
     os.system("docker compose -f ../../oai-cn/docker-compose.yaml up -d")
-<<<<<<< HEAD
     for kk in range(start_ue,end_ue+1):
-=======
-    os.system("docker exec -d oai-ext-dn iperf -s -i 1 -B 192.168.71.135")
-    for kk in range(1,int(sys.argv[1])+1):
->>>>>>> 1de0aa1fabc135914cd0959f8bd3be02123199ae
         
         while flag == 0:
             time.sleep(2)
@@ -289,18 +276,12 @@ def autoUE():
             f.write(file)
         os.system(f"docker compose up -d tt-gnb")
         print("set up ran")
-<<<<<<< HEAD
         time.sleep(1)
         os.system(f"docker exec tt-gnb chmod +x run.sh build.sh")
-=======
-        time.sleep(15)
-        os.system(f"docker exec tt-gnb chmod +x run.sh ")
->>>>>>> 1de0aa1fabc135914cd0959f8bd3be02123199ae
         os.system(f"docker exec -d tt-gnb ./run.sh ")
         #os.system(f"docker exec -d tt-gnb  cd /opt/tt-ran/tt/cmake_targets/ran_build/build/ && ./nr-softmodem -O /opt/tt-ran/tt/targets/PROJECTS/GENERIC-NR-5GC/CONF/gnb.sa.band78.fr1.106PRB.usrpb210.conf --rfsim -E --sa  --rfsimulator.options chanmod --TAP 1 --TTI 1 --SNR 1 --MCS 1 --CQI 1 --TPT 1")
         for i in range(151,151+kk):
             os.system(f"docker compose up -d tt-nrue{i}")
-<<<<<<< HEAD
             time.sleep(min((i-150)*4+5,30))
             #os.system(f"docker exec -it tt-ue{i} ifconfig oaitun_ue1| grep 'inet ' ")
             
@@ -316,22 +297,6 @@ def autoUE():
         os.system(f"docker exec tt-gnb chmod +x stop.sh ")
         os.system(f"docker exec -d tt-gnb ./stop.sh ")
         time.sleep(5)
-=======
-            time.sleep(min((i-150)*4+25,37))
-            #os.system(f"docker exec -it tt-ue{i} ifconfig oaitun_ue1| grep 'inet ' ")
-            os.system(f"docker exec -d tt-ue{i} iperf -t 86400 -i 1 -fk -c 192.168.71.135 -b 2M -B 10.0.0.{i-149} ")
-            os.system(f"docker exec -d tt-ue{i} iperf -s -u -i 1 -B 10.0.0.{i-149} ")
-            time.sleep(5)
-            os.system(f"docker exec -d oai-ext-dn iperf -u -t 86400 -i 1 -fk -B 192.168.71.135 -b 2M -c 10.0.0.{i-149}")
-
-
-        #test
-        time.sleep(30)
-        print("kill gnb")
-        os.system(f"docker exec tt-gnb chmod +x stop.sh ")
-        os.system(f"docker exec -d tt-gnb ./stop.sh ")
-        time.sleep(15)
->>>>>>> 1de0aa1fabc135914cd0959f8bd3be02123199ae
 
         os.system(f"docker compose down")
 
@@ -357,11 +322,7 @@ def processDATA():
     # dl_tpt_ttis_a = []
     # ul_cqi_ttis_a = []
 
-<<<<<<< HEAD
     for kk in range(start_ue,end_ue+1):
-=======
-    for kk in range(1,int(sys.argv[1])+1):
->>>>>>> 1de0aa1fabc135914cd0959f8bd3be02123199ae
 
         flag=1
         while flag == 1:
@@ -590,12 +551,8 @@ def processDATA():
 
         fig.savefig("plotting.png", format="png", dpi=150)
 
-<<<<<<< HEAD
         #os.system(f"mkdir ./plot/ue{kk}_{sys.argv[2]}")
         os.makedirs(f"./plot/ue{kk}_{sys.argv[2]}", exist_ok=True)
-=======
-        os.system(f"mkdir ./plot/ue{kk}_{sys.argv[2]}")
->>>>>>> 1de0aa1fabc135914cd0959f8bd3be02123199ae
         os.system(f"cp ../../../logs/tti.txt ./plot/ue{kk}_{sys.argv[2]}/tti.txt")
         os.system(f"cp ../../../logs/snr.txt ./plot/ue{kk}_{sys.argv[2]}/snr.txt")
         os.system(f"cp plotting.png ./plot/ue{kk}_{sys.argv[2]}/plotting.png")
