@@ -92,13 +92,14 @@ unsigned short config_frames[4] = {2,9,11,13};
 #include <openair1/PHY/MODULATION/nr_modulation.h>
 #include "openair2/GNB_APP/gnb_paramdef.h"
 
-extern FILE *fpr;
-extern FILE *fpi;
+extern FILE *fpr[50];
+extern FILE *fpi[50];
 extern FILE *fprsrp;
 extern FILE *fpcqi;
 extern FILE *fplog; 
 extern FILE *fplog2;
 extern FILE *fplog3;
+
 // extern FILE *fplog4;
 
 extern int counterr;
@@ -107,13 +108,14 @@ extern int timing_array_index;
 extern int snrlog;
 
 int counterr=0;
-FILE *fpr;
-FILE *fpi;
+FILE *fpr[50];
+FILE *fpi[50];
 FILE *fpcqi;
 FILE *fprsrp;
 FILE *fplog;
 FILE *fplog2;
 FILE *fplog3;
+int first_time=0;
 // FILE *fplog4;
 long long unsigned int timing_array[_ARRAY_SIZE];
 int timing_array_index;
@@ -279,8 +281,8 @@ void init_openair0()
   // fpr = fopen("../../../channel/real_random_10tap.txt", "r");
   // fpi = fopen("../../../channel/real_random_10tap.txt", "r");
 
-  fpr = fopen("../../../channel/channel_clean.txt", "r");
-  fpi = fopen("../../../channel/channel_clean.txt", "r");
+  fpr[0] = fopen("../../../channel/channel_clean.txt", "r");
+  fpi[0] = fopen("../../../channel/channel_clean.txt", "r");
 
   // if (snrlog){
     // fpsnr = fopen("../../../logs/snr.txt", "w"); // file the SNR is written to
@@ -625,8 +627,8 @@ int main(int argc, char **argv)
         phy_vars->rfdevice.trx_end_func(&phy_vars->rfdevice);
     }
   }
-  fclose(fpr);
-  fclose(fpi);
+  fclose(fpr[0]);
+  fclose(fpi[0]);
   fclose(fprsrp);
   fclose(fpcqi);
   // fclose(fplog);

@@ -29,7 +29,8 @@ void rxAddInput( const c16_t *input_sig,
                  channel_desc_t *channelDesc,
                  int nbSamples,
                  uint64_t TS,
-                 uint32_t CirSize
+                 uint32_t CirSize,
+                 uint32_t sock_num
                );
 
 #endif

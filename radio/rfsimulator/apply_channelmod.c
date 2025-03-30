@@ -34,8 +34,9 @@
 
 extern long long unsigned int timing_array[_ARRAY_SIZE];
 extern int timing_array_index;
-extern FILE *fpr;
-extern FILE *fpi;
+extern FILE *fpr[50];
+extern FILE *fpi[50];
+extern int first_time;
 // extern FILE *fplog4; 
 extern int taplen;
 //extern int counterr;
@@ -72,7 +73,8 @@ void rxAddInput(const c16_t *input_sig,
                 channel_desc_t *channelDesc,
                 int nbSamples,
                 uint64_t TS,
-                uint32_t CirSize)
+                uint32_t CirSize,
+                uint32_t sock_num)
 {
   
   char strr[100],stri[100];
@@ -163,7 +165,7 @@ void rxAddInput(const c16_t *input_sig,
   const int nbTx=channelDesc->nb_tx;
    // counterr++;
   // int mylen=1;
-    float mchannelModelr[10]={0.1, 0, 0, 0, 1, 0, 0, 0, 0, 0.1};
+    float mchannelModelr[10]={1, 0, 0, 0, 0, 0, 0, 0, 0, 0};
     float mchannelModeli[10]={0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
       //printf("hiii\n");
     
@@ -176,7 +178,7 @@ void rxAddInput(const c16_t *input_sig,
     //   fflush(fplog4); // Ensure it's written to the file immediately
     // }
 
-    if (fgets(strr, sizeof(strr), fpr) != NULL) {
+    if (fgets(strr, sizeof(strr), fpr[sock_num-first_time]) != NULL) {
       // Read successful, process the line in strr
       //printf("Read line: %s", strr);
       char *token1 = strtok(strr, " ");
@@ -191,7 +193,7 @@ void rxAddInput(const c16_t *input_sig,
       //printf("\n");
     }
    
-    if (fgets(stri, sizeof(stri), fpi) != NULL) {
+    if (fgets(stri, sizeof(stri), fpi[sock_num-first_time]) != NULL) {
       // Read successful, process the line in strr
       //printf("Read line: %s", stri);
       char *token2 = strtok(stri, " ");
@@ -298,8 +300,8 @@ void rxAddInput(const c16_t *input_sig,
       channelDesc->Doppler_phase_cur[rxAnt] += channelDesc->Doppler_phase_inc;
     }
 
-    out_ptr->r = lround(rx_tmp.r*pathLossLinear + noise_per_sample*gaussZiggurat(0.0,1.0));
-    out_ptr->i = lround(rx_tmp.i*pathLossLinear + noise_per_sample*gaussZiggurat(0.0,1.0));
+    out_ptr->r += lround(rx_tmp.r*pathLossLinear + noise_per_sample*gaussZiggurat(0.0,1.0));
+    out_ptr->i += lround(rx_tmp.i*pathLossLinear + noise_per_sample*gaussZiggurat(0.0,1.0));
     out_ptr++;
   }
 

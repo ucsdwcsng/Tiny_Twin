@@ -94,9 +94,8 @@ unsigned short config_frames[4] = {2,9,11,13};
 #endif
 
 extern FILE *fplog2;
-extern FILE *fpi;
-extern FILE *fpr;
-extern FILE *fplog;
+extern FILE *fpi[50];
+extern FILE *fpr[50];
 extern FILE *fplog3;
 extern FILE *fplog4;
 extern FILE *fpsnr;
@@ -125,8 +124,8 @@ extern int mcslog;
 extern int tti_counter;
 
 FILE *fplog2;
-FILE *fpi;
-FILE *fpr;
+FILE *fpi[50];
+FILE *fpr[50];
 FILE *fplog;
 FILE *fplog3;
 FILE *fplog4;
@@ -139,6 +138,7 @@ FILE *fpulmcs;
 FILE *fpdlmcs;
 FILE *fptti;
 int tti_counter=0;
+int first_time=0;
 
 long long unsigned int timing_array[_ARRAY_SIZE];
 int timing_array_index;
@@ -650,10 +650,10 @@ int main( int argc, char **argv ) {
   // METAL VERSIONS //
   // fpr = fopen("../../../channel/real_random_10tap.txt", "r");
   // fpi = fopen("../../../channel/real_random_10tap.txt", "r");
-
-  fpr = fopen("../../../channel/channel_clean.txt", "r");
-  fpi = fopen("../../../channel/channel_clean.txt", "r");
-
+  for (int i=0;i<50;i++){
+    fpr[i] = fopen("../../../channel/channel_clean.txt", "r");
+    fpi[i] = fopen("../../../channel/channel_clean.txt", "r");
+  }
   // fplog = fopen("../../../logs/timing.txt", "w"); // file the data from the timing array is written to
   // fplog2 = fopen("../../../logs/mac.txt", "w"); // when did a TTI start 
   fplog3 = fopen("../../../logs/gnb-mimo.txt", "w"); // MAC log - DL TPT
@@ -925,12 +925,12 @@ int main( int argc, char **argv ) {
 
   free(pckg);
   logClean();
-
+  for (int i=0;i<50;i++){
+    fclose(fpr[i]);
+    fclose(fpi[i]);
+  }
   //fclose(fplog2);
-  fclose(fpi);
   fclose(fplog);
-  fclose(fpr);
-  fclose(fplog3);
   // fclose(fplog4);
   fclose(fpsnr);
   fclose(fptti);

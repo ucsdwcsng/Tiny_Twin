@@ -118,6 +118,8 @@ typedef enum { SIMU_ROLE_SERVER = 1, SIMU_ROLE_CLIENT } simuRole;
   };
 
 extern FILE *fplog3;
+extern int first_time;
+
 static void getset_currentchannels_type(char *buf, int debug, webdatadef_t *tdata, telnet_printfunc_t prnt);
 extern int get_currentchannels_type(char *buf, int debug, webdatadef_t *tdata, telnet_printfunc_t prnt); // in random_channel.c
 static int rfsimu_setchanmod_cmd(char *buff, int debug, telnet_printfunc_t prnt, void *arg);
@@ -670,7 +672,7 @@ static int startClient(openair0_device *device)
   while (true) {
     LOG_I(HW, "Trying to connect to %s:%d\n", t->ip, t->port);
     sock = client_try_connect(t->ip, t->port);
-
+    printf("\n\n\n%d\n\n\n",sock);
     if (sock > 0) {
       LOG_I(HW, "Connection to %s:%d established\n", t->ip, t->port);
       break;
@@ -983,14 +985,18 @@ static int rfsimulator_read(openair0_device *device, openair0_timestamp *ptimest
   // Clear the output buffer
   for (int a=0; a<nbAnt; a++)
     memset(samplesVoid[a],0,sampleToByte(nsamps,1));
-
+ 
   // Add all input nodes signal in the output buffer
   for (int sock = 0; sock < MAX_FD_RFSIMU; sock++) {
     buffer_t *ptr=&t->buf[sock];
-
+    
     if ( ptr->circularBuf ) {
       bool reGenerateChannel=false;
+      if(first_time==0){
+        first_time=sock;
+      }
     
+      
       //fixme: when do we regenerate
       // it seems legacy behavior is: never in UL, each frame in DL
       if (reGenerateChannel)
@@ -1017,7 +1023,8 @@ static int rfsimulator_read(openair0_device *device, openair0_timestamp *ptimest
                      ptr->channel_model,
                      nsamps,
                      t->nextRxTstamp,
-                     CirSize);
+                     CirSize,
+                     sock);
         }
         else { // no channel modeling
           int nbAnt_tx = ptr->th.nbAnt; // number of Tx antennas
