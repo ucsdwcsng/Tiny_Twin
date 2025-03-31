@@ -26,6 +26,7 @@ services:
             - ../../../logs_gnb:/opt/tt-ran/etc/logs
             - ./run.sh:/opt/tt-ran/run.sh
             - ./stop.sh:/opt/tt-ran/stop.sh
+            - ./build.sh:/opt/tt-ran/build.sh
         # environment:
         #     USE_ADDITIONAL_OPTIONS: --rfsim -E --sa --rfsimulator.options chanmod -T 10 -O /opt/oai-gnb/etc/gnb.conf
         #     ASAN_OPTIONS: detect_leaks=0
@@ -282,7 +283,7 @@ def autoUE():
         #os.system(f"docker exec -d tt-gnb  cd /opt/tt-ran/tt/cmake_targets/ran_build/build/ && ./nr-softmodem -O /opt/tt-ran/tt/targets/PROJECTS/GENERIC-NR-5GC/CONF/gnb.sa.band78.fr1.106PRB.usrpb210.conf --rfsim -E --sa  --rfsimulator.options chanmod --TAP 1 --TTI 1 --SNR 1 --MCS 1 --CQI 1 --TPT 1")
         for i in range(151,151+kk):
             os.system(f"docker compose up -d tt-nrue{i}")
-            time.sleep(min((i-150)*4+5,30))
+            time.sleep(min((i-150)*10-3,50))
             #os.system(f"docker exec -it tt-ue{i} ifconfig oaitun_ue1| grep 'inet ' ")
             
             os.system(f"docker exec -d tt-ue{i} iperf -s -u -i 1 -B 10.0.0.{i-149} ")
