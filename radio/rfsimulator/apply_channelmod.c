@@ -267,7 +267,7 @@ void rxAddInput(const c16_t *input_sig,
 
       //const struct complex *channelModelEnd=channelModel+channelDesc->channel_length;
       //for (int l = 0; l<(int)channelDesc->channel_length; l++) {
-      for (int l = 0; l<taplen; l=l+4) {
+      for (int l = 0; l<taplen; l=l+1) {
         // let's assume TS+i >= l
         // fixme: the rfsimulator current structure is interleaved antennas
         // this has been designed to not have to wait a full block transmission
@@ -275,7 +275,7 @@ void rxAddInput(const c16_t *input_sig,
         // it would be better to split out each antenna in a separate flow
         // that will allow to mix ru antennas freely
         // (X + cirSize) % cirSize to ensure that index is positive
-        const int idx = ((TS + i - l - 3 - dd) * nbTx + txAnt + CirSize) % CirSize;
+        const int idx = ((TS + i - l - dd) * nbTx + txAnt + CirSize) % CirSize;
 
         // save iq to a 256 avx2 vector from memory
 
