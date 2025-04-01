@@ -42,6 +42,7 @@ Go to the `tinytwin-oai/sims` folder and bring up the services defined in the ap
 
 ```
 cd oai-cn/
+docker pull mysql:8.0.14
 sudo docker compose up -d
 ```
 

@@ -6,7 +6,7 @@ if [ "$MYSQL_ROOT_PASSWORD" ] && [ -z "$MYSQL_USER" ] && [ -z "$MYSQL_PASSWORD" 
 	exit 0
 fi
 
-host="$(hostname --ip-address || echo '127.0.0.1')"
+host="mysql"
 user="${MYSQL_USER:-root}"
 export MYSQL_PWD="${MYSQL_PASSWORD:-$MYSQL_ROOT_PASSWORD}"
 

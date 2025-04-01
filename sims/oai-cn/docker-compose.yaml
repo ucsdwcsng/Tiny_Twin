@@ -1,7 +1,8 @@
 services:
     mysql:
         container_name: "mysql"
-        image: mysql:8.0
+        image: mysql:8.0.14
+        command: --user=mysql
         volumes:
             - ./database/oai_db.sql:/docker-entrypoint-initdb.d/oai_db.sql
             - ./healthscripts/mysql-healthcheck.sh:/tmp/mysql-healthcheck.sh
