@@ -119,6 +119,7 @@ typedef enum { SIMU_ROLE_SERVER = 1, SIMU_ROLE_CLIENT } simuRole;
 
 extern FILE *fplog3;
 extern int first_time;
+extern int gnb1_ue0;
 
 static void getset_currentchannels_type(char *buf, int debug, webdatadef_t *tdata, telnet_printfunc_t prnt);
 extern int get_currentchannels_type(char *buf, int debug, webdatadef_t *tdata, telnet_printfunc_t prnt); // in random_channel.c
@@ -704,7 +705,20 @@ static int rfsimulator_write_internal(rfsimulator_state_t *t, openair0_timestamp
 
       if (nbAnt == 1) {
         if (b->conn_sock >= 0) {
-          fullwrite(b->conn_sock, samplesVoid[0], sampleToByte(nsamps, nbAnt), t);
+          
+          if (gnb1_ue0==0 && first_time!=0) {
+            buffer_t *ptr=b;
+            sample_t up_conv_res[nsamps];
+            txAddInput((c16_t *) samplesVoid[0], (c16_t *)up_conv_res,
+                          0,
+                          ptr->channel_model,
+                          nsamps,
+                          t->lastWroteTS,
+                          CirSize);
+            fullwrite(b->conn_sock, (void *)up_conv_res, sampleToByte(nsamps, nbAnt), t);
+          } else{
+            fullwrite(b->conn_sock, samplesVoid[0], sampleToByte(nsamps, nbAnt), t);
+          }
         }
       } else {
         for (int a = 0; a < nbAnt; a++) {
@@ -1009,8 +1023,7 @@ static int rfsimulator_read(openair0_device *device, openair0_timestamp *ptimest
       // // MIMO should be handled here // //
       for (int a=0; a<nbAnt; a++) {//loop over number of Rx antennas
 
-        if ( ptr->channel_model != NULL ) { // apply a channel model
-          //printf("hiii");
+        if ( ptr->channel_model != NULL && gnb1_ue0==0) { // apply a channel model
           // log time
           struct timespec start; // Structs to store time
           clock_gettime(CLOCK_REALTIME, &start);
