@@ -1,8 +1,7 @@
 services:
     mysql:
         container_name: "mysql"
-        image: mysql:8.0.14
-        command: --user=mysql
+        image: mysql:8.0
         volumes:
             - ./database/oai_db.sql:/docker-entrypoint-initdb.d/oai_db.sql
             - ./healthscripts/mysql-healthcheck.sh:/tmp/mysql-healthcheck.sh
@@ -21,8 +20,8 @@ services:
             public_net:
                 ipv4_address: 192.168.70.131
                 
-    oai-ims:
-        container_name: "oai-ims"
+    ims:
+        container_name: "ims"
         image: oaisoftwarealliance/ims:latest
         volumes:
             - ./conf/sip.conf:/etc/asterisk/sip.conf
@@ -151,16 +150,13 @@ services:
         networks:
             public_net:
                 ipv4_address: 192.168.70.134
-            traffic_net:
-                ipv4_address: 192.168.71.134
     oai-ext-dn:
         privileged: true
         init: true
         container_name: oai-ext-dn
         image: oaisoftwarealliance/trf-gen-cn5g:jammy
         entrypoint: /bin/bash -c \
-              "iptables -t nat -A POSTROUTING -o eth0 -j MASQUERADE;"\
-              "ip route add 10.0.0.0/16 via 192.168.71.134 dev eth0; ip route; sleep infinity"
+              "ip route add 10.0.0.0/16 via 192.168.70.134 dev eth0; ip route; sleep infinity"
         command: ["/bin/bash", "-c", "trap : SIGTERM SIGINT; sleep infinity & wait"]
         healthcheck:
             test: /bin/bash -c "ip r | grep 10.0.0"
@@ -168,23 +164,14 @@ services:
             timeout: 2s
             retries: 10
         networks:
-            traffic_net:
-                ipv4_address: 192.168.71.135
-            
+            public_net:
+                ipv4_address: 192.168.70.135
 networks:
     public_net:
         driver: bridge
-        name: tt-public-net
+        name: oai-cn5g-public-net
         ipam:
             config:
                 - subnet: 192.168.70.128/26
         driver_opts:
-            com.docker.network.bridge.name: "tt-public-net"
-    traffic_net:
-        driver: bridge
-        name: tt-traffic-net
-        ipam:
-            config:
-                - subnet: 192.168.71.128/26
-        driver_opts:
-            com.docker.network.bridge.name: "tt-traffic-net"
+            com.docker.network.bridge.name: "oai-cn5g"

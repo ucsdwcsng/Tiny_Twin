@@ -6,7 +6,7 @@ import numpy as np
 import matplotlib
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt 
-start_ue = int(sys.argv[1])
+start_ue = 1
 end_ue = int(sys.argv[1])
 start='''
 services:
@@ -221,9 +221,9 @@ def Convert(snr_ttis, snr_values):
 
 def create_docker(i):
     template=f'''
-    tt-nrue{i}:
+    tt-nrue{i-160}:
         image: tt-nrue:v2
-        container_name: tt-ue{i}
+        container_name: tt-ue{i-160}
         privileged: true
         cap_drop:
             - ALL
@@ -237,14 +237,14 @@ def create_docker(i):
             - ../../../logs_ue:/opt/oai-nr-ue/etc/logs
         entrypoint: >
             /bin/bash -c "ls && cd tt/cmake_targets/ran_build/build/ &&
-            ./nr-uesoftmodem --uicc0.imsi 00101000000000{i-150} -C 3619200000 -r 106 --numerology 1 --ssb 516 -E --sa --rfsim --rfsimulator.options chanmod -O ../../../ci-scripts/conf_files/nrue.uicc.conf --TAP {sys.argv[2]} --rfsimulator.serveraddr 192.168.70.140 &&
+            ./nr-uesoftmodem --uicc0.imsi 0010100000000{i-150} -C 3619200000 -r 106 --numerology 1 --ssb 516 -E --sa --rfsim --rfsimulator.options chanmod -O ../../../ci-scripts/conf_files/nrue.uicc.conf --TAP {sys.argv[2]} --rfsimulator.serveraddr 192.168.70.140 &&
             exec /bin/bash"
         # entrypoint: /bin/bash
         stdin_open: true  
         tty: true        
         networks:
             public_net:
-                ipv4_address: 192.168.70.{i}
+                ipv4_address: 192.168.70.{i-10}
         devices:
              - /dev/net/tun:/dev/net/tun
         healthcheck:
@@ -259,15 +259,15 @@ def create_docker(i):
 def autoUE():
     global flag
     flag=1
-    os.system("docker compose -f ../../oai-cn/docker-compose.yaml up -d")
-    for kk in range(start_ue,end_ue+1):
-        
+    
+    for kk in range(start_ue,end_ue+1,3):
+        os.system("docker compose -f ../../oai-cn/docker-compose.yaml up -d")
         while flag == 0:
             time.sleep(2)
         
 
         file=""
-        for i in range(151,151+kk):
+        for i in range(161,161+kk):
             file=file+"\n"+create_docker(i)
         file = start+ file+ end
         print(file)
@@ -277,32 +277,35 @@ def autoUE():
             f.write(file)
         os.system(f"docker compose up -d tt-gnb")
         print("set up ran")
-        time.sleep(1)
+        time.sleep(10)
         os.system(f"docker exec tt-gnb chmod +x run.sh build.sh")
         os.system(f"docker exec -d tt-gnb ./run.sh ")
         #os.system(f"docker exec -d tt-gnb  cd /opt/tt-ran/tt/cmake_targets/ran_build/build/ && ./nr-softmodem -O /opt/tt-ran/tt/targets/PROJECTS/GENERIC-NR-5GC/CONF/gnb.sa.band78.fr1.106PRB.usrpb210.conf --rfsim -E --sa  --rfsimulator.options chanmod --TAP 1 --TTI 1 --SNR 1 --MCS 1 --CQI 1 --TPT 1")
-        for i in range(151,151+kk):
-            os.system(f"docker compose up -d tt-nrue{i}")
-            time.sleep(min((i-150)*12-3,60))
+        for i in range(161,161+kk):
+            os.system(f"docker compose up -d tt-nrue{i-160}")
+            time.sleep(min((i-160)*12,15))
             #os.system(f"docker exec -it tt-ue{i} ifconfig oaitun_ue1| grep 'inet ' ")
-            
-            os.system(f"docker exec -d tt-ue{i} iperf -s -u -i 1 -B 10.0.0.{i-149} ")
-            os.system(f"docker exec -d oai-ext-dn iperf -s -i 1 -B 192.168.70.135 -p 520{i-149}")
-            time.sleep(3)
-            os.system(f"docker exec -d oai-ext-dn iperf -u -t 86400 -i 1 -fk -B 192.168.70.135 -b 2M -c 10.0.0.{i-149}")
-            os.system(f"docker exec -d tt-ue{i} iperf -t 86400 -i 1 -fk -c 192.168.70.135 -b 2M -B 10.0.0.{i-149} -p 520{i-149}")
+
+        for ik in range(161,161+kk): 
+            os.system(f"docker exec -d tt-ue{ik-160} iperf -s -u -i 1 -B 10.0.0.{ik-159} ")
+            os.system(f"docker exec -d oai-ext-dn iperf -s -i 1 -B 192.168.70.135 -p 52{ik-149}")
+        time.sleep(2)
+        for jk in range(161,161+kk): 
+            os.system(f"docker exec -d oai-ext-dn iperf -u -t 86400 -i 1 -fk -B 192.168.70.135 -b 2M -c 10.0.0.{jk-159}")
+            os.system(f"docker exec -d tt-ue{jk-160} iperf -t 86400 -i 1 -fk -c 192.168.70.135 -b 2M -B 10.0.0.{jk-159} -p 52{ik-149}")
 
         #test
-        time.sleep(20)
+        time.sleep(240)
         print("kill gnb")
         os.system(f"docker exec tt-gnb chmod +x stop.sh ")
         os.system(f"docker exec -d tt-gnb ./stop.sh ")
         time.sleep(5)
 
         os.system(f"docker compose down")
+        os.system("docker compose -f ../../oai-cn/docker-compose.yaml down")
 
         flag=0
-    os.system("docker compose -f ../../oai-cn/docker-compose.yaml down")
+        
     
 
 def processDATA():
@@ -323,7 +326,7 @@ def processDATA():
     # dl_tpt_ttis_a = []
     # ul_cqi_ttis_a = []
 
-    for kk in range(start_ue,end_ue+1):
+    for kk in range(start_ue,end_ue+1,3):
 
         flag=1
         while flag == 1:

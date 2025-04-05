@@ -99,6 +99,7 @@ extern FILE *fpcqi;
 extern FILE *fplog; 
 extern FILE *fplog2;
 extern FILE *fplog3;
+extern int gnb1_ue0;
 
 // extern FILE *fplog4;
 
@@ -116,6 +117,7 @@ FILE *fplog;
 FILE *fplog2;
 FILE *fplog3;
 int first_time=0;
+int gnb1_ue0=0;
 // FILE *fplog4;
 long long unsigned int timing_array[_ARRAY_SIZE];
 int timing_array_index;
@@ -283,6 +285,9 @@ void init_openair0()
 
   fpr[0] = fopen("../../../channel/channel_clean.txt", "r");
   fpi[0] = fopen("../../../channel/channel_clean.txt", "r");
+
+  fpr[1] = fopen("../../../channel/channel_clean.txt", "r");
+  fpi[1] = fopen("../../../channel/channel_clean.txt", "r");
 
   // if (snrlog){
     // fpsnr = fopen("../../../logs/snr.txt", "w"); // file the SNR is written to
@@ -629,6 +634,8 @@ int main(int argc, char **argv)
   }
   fclose(fpr[0]);
   fclose(fpi[0]);
+  fclose(fpr[1]);
+  fclose(fpi[1]);
   fclose(fprsrp);
   fclose(fpcqi);
   // fclose(fplog);

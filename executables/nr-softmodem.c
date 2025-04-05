@@ -107,6 +107,7 @@ extern FILE *fpdltpt;
 extern FILE *fpulmcs;
 extern FILE *fpdlmcs;
 extern const char *channel_file;
+extern int gnb1_ue0;
 
 extern long long unsigned int timing_array[_ARRAY_SIZE];
 extern int timing_array_index;
@@ -139,6 +140,7 @@ FILE *fpdlmcs;
 FILE *fptti;
 int tti_counter=0;
 int first_time=0;
+int gnb1_ue0=1;
 
 long long unsigned int timing_array[_ARRAY_SIZE];
 int timing_array_index;

@@ -165,8 +165,8 @@ void rxAddInput(const c16_t *input_sig,
   const int nbTx=channelDesc->nb_tx;
    // counterr++;
   // int mylen=1;
-    float mchannelModelr[10]={1, 0, 0, 0, 0, 0, 0, 0, 0, 0};
-    float mchannelModeli[10]={0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+  float mchannelModelr[20]={1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+  float mchannelModeli[20]={0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
       //printf("hiii\n");
     
     struct timespec start, end; // Structs to store time
@@ -336,3 +336,121 @@ void rxAddInput(const c16_t *input_sig,
   
 
 }
+
+
+void txAddInput(const c16_t *input_sig,
+  c16_t *after_channel_sig,
+  int rxAnt,
+  channel_desc_t *channelDesc,
+  int nbSamples,
+  uint64_t TS,
+  uint32_t CirSize)
+{
+
+ char strr[100],stri[100];
+
+// fgets(strr, sizeof(strr), fpr);
+// fgets(stri, sizeof(stri), fpi);
+// // channelDesc->path_loss_dB should contain the total path gain
+// // so, in actual RF: tx gain + path loss + rx gain (+antenna gain, ...)
+// // UE and NB gain control to be added
+// // Fixme: not sure when it is "volts" so dB is 20*log10(...) or "power", so dB is 10*log10(...)
+const double pathLossLinear = pow(10,channelDesc->path_loss_dB/20.0);
+// // Energy in one sample to calibrate input noise
+// // the normalized OAI value seems to be 256 as average amplitude (numerical amplification = 1)
+const double noise_per_sample = pow(10,channelDesc->noise_power_dB/10.0) * 256;
+const uint64_t dd = channelDesc->channel_offset;
+// const int nbTx=channelDesc->nb_tx;
+// // counterr++;
+// // int mylen=1;
+
+float mchannelModelr[20]={1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+float mchannelModeli[20]={0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+// //printf("hiii\n");
+
+
+if (fgets(strr, sizeof(strr), fpr[1]) != NULL) {
+  // Read successful, process the line in strr
+  //printf("Read line: %s", strr);
+  char *token1 = strtok(strr, " ");
+  int idx1 = 0;
+
+  while (token1 != NULL && idx1 < taplen) {
+  mchannelModelr[idx1] = atof(token1);
+  //printf("%f\n",mchannelModelr[idx1]);
+  token1 = strtok(NULL, " ");
+  idx1++;
+  }
+}
+
+if (fgets(stri, sizeof(stri), fpi[1]) != NULL) {
+  // Read successful, process the line in strr
+  //printf("Read line: %s", stri);
+  char *token2 = strtok(stri, " ");
+  int idx2 = 0;
+
+  while (token2 != NULL && idx2 < taplen) {
+  mchannelModeli[idx2] = atof(token2);
+  token2 = strtok(NULL, " ");
+  idx2++;
+  }
+}
+
+// // clock_gettime(CLOCK_REALTIME, &start); // Log start time
+// // const struct complexd *channelModel= channelDesc->ch[rxAnt+(txAnt*channelDesc->nb_rx)];
+// clock_gettime(CLOCK_REALTIME, &end); // Log end time
+
+// // diff = (end.tv_sec - start.tv_sec) * 1e9 + (end.tv_nsec - start.tv_nsec);
+// // diff.tv_nsec = end.tv_nsec - start.tv_nsec;
+// // append to the end of timing_array which has a fixed size, so if the array is full do not add
+// diff = (end.tv_sec - start.tv_sec) * 1e9 + (end.tv_nsec - start.tv_nsec);
+// // if (timing_array_index < _ARRAY_SIZE) {
+// //   timing_array[timing_array_index] = diff;
+// //   timing_array_index = timing_array_index + 1;  
+// // }
+
+for (int i=0; i<nbSamples; i++) {
+
+struct complex16 *out_ptr=after_channel_sig+i;
+struct complexd rx_tmp= {0};
+
+// for (int txAnt=0; txAnt < nbTx; txAnt++) {
+
+for (int l = 0; l<taplen; l++) {
+
+
+const int idx = ((i - l -dd) + CirSize) % CirSize;
+
+
+
+const struct complex16 tx16 = input_sig[idx];
+// // rx_tmp.r += tx16.r * channelModel[l].r - tx16.i * channelModel[l].i;
+// // rx_tmp.i += tx16.i * channelModel[l].r + tx16.r * channelModel[l].i;
+rx_tmp.r += tx16.r * mchannelModelr[l] - tx16.i * mchannelModeli[l];
+rx_tmp.i += tx16.i * mchannelModelr[l] + tx16.r * mchannelModeli[l];
+// //printf("Read line: %f", mchannelModelr);
+// //printf("Loop l=%d, txAnt=%d, rxAnt=%d\n", l, txAnt, rxAnt);
+// //printf("  tx16 (real: %d, imag: %d), channelModel[%d] (real: %f, imag: %f)\n", tx16.r, tx16.i, l, channelModel[l].r, channelModel[l].i);
+} //l
+//}
+
+
+if (channelDesc->Doppler_phase_inc != 0.0) {
+#ifdef CMPLX
+double complex in = CMPLX(rx_tmp.r, rx_tmp.i);
+#else
+double complex in = rx_tmp.r + rx_tmp.i * I;
+#endif
+double complex out = in * cexp(channelDesc->Doppler_phase_cur[rxAnt] * I);
+rx_tmp.r = creal(out);
+rx_tmp.i = cimag(out);
+channelDesc->Doppler_phase_cur[rxAnt] += channelDesc->Doppler_phase_inc;
+}
+
+out_ptr->r = lround(rx_tmp.r*pathLossLinear + noise_per_sample*gaussZiggurat(0.0,1.0));
+out_ptr->i = lround(rx_tmp.i*pathLossLinear + noise_per_sample*gaussZiggurat(0.0,1.0));
+ out_ptr++;
+}
+
+}
+

@@ -80,22 +80,22 @@ RUN apt-get update && apt-get install -y \
 ENV CMAKE_PREFIX_PATH=/usr/include/yaml-cpp
     
 # build all targets so final targets can be created afterwards
-RUN /bin/sh oaienv && \
-    cd cmake_targets && \
-    mkdir -p log && \
-    ./build_oai -C && \
-    ./build_oai -I -w SIMU \
-        --gNB --nrUE \
-        --build-lib "telnetsrv enbscope uescope nrscope" \
-        --cmake-opt -DXAPP_MULTILANGUAGE=OFF --cmake-opt -DKPM_VERSION=$KPM_VERSION --cmake-opt -DE2AP_VERSION=$E2AP_VERSION \
-        --cmake-opt -DCMAKE_C_FLAGS="-w" --cmake-opt -DCMAKE_CXX_FLAGS="-w" $BUILD_OPTION && \
-    #     #--cmake-opt -DCMAKE_C_FLAGS="-Werror" --cmake-opt -DCMAKE_CXX_FLAGS="-Werror" $BUILD_OPTION && \
-    # Mainly to see if the sanitize option was perfectly executed
-    echo "---- ldd on executables ----" && \
-    ldd ran_build/build/*softmodem* ran_build/build/nr-cuup && \
-    # ran_build/build/oairu && \
-    echo "---- ldd on shared libraries ----" && \
-    ldd ran_build/build/*.so
+# RUN /bin/sh oaienv && \
+#     cd cmake_targets && \
+#     mkdir -p log && \
+#     ./build_oai -C && \
+#     ./build_oai -I -w SIMU \
+#         --gNB --nrUE \
+#         --build-lib "telnetsrv enbscope uescope nrscope" \
+#         --cmake-opt -DXAPP_MULTILANGUAGE=OFF --cmake-opt -DKPM_VERSION=$KPM_VERSION --cmake-opt -DE2AP_VERSION=$E2AP_VERSION \
+#         --cmake-opt -DCMAKE_C_FLAGS="-w" --cmake-opt -DCMAKE_CXX_FLAGS="-w" $BUILD_OPTION && \
+#     #     #--cmake-opt -DCMAKE_C_FLAGS="-Werror" --cmake-opt -DCMAKE_CXX_FLAGS="-Werror" $BUILD_OPTION && \
+#     # Mainly to see if the sanitize option was perfectly executed
+#     echo "---- ldd on executables ----" && \
+#     ldd ran_build/build/*softmodem* ran_build/build/nr-cuup && \
+#     # ran_build/build/oairu && \
+#     echo "---- ldd on shared libraries ----" && \
+#     ldd ran_build/build/*.so
     
 RUN apt-get update && \
     DEBIAN_FRONTEND=noninteractive apt-get upgrade --yes && \
