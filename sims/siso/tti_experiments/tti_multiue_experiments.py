@@ -7,7 +7,7 @@ import matplotlib
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt 
 
-start_ue = 1
+start_ue = int(sys.argv[1])
 end_ue = int(sys.argv[1])
 
 start_tap = int(sys.argv[2])

@@ -77,7 +77,7 @@ void rxAddInput(const c16_t *input_sig,
                 uint32_t sock_num)
 {
   
-  char strr[100],stri[100];
+  char strr[2000],stri[2000];
  
   //fgets(strr, sizeof(strr), fpr);
   //fgets(stri, sizeof(stri), fpi);
@@ -347,7 +347,7 @@ void txAddInput(const c16_t *input_sig,
   uint32_t CirSize)
 {
 
- char strr[100],stri[100];
+ char strr[2000],stri[2000];
 
 // fgets(strr, sizeof(strr), fpr);
 // fgets(stri, sizeof(stri), fpi);
