@@ -56,7 +56,7 @@ services:
             - ../../../logs_ue:/opt/oai-nr-ue/etc/logs
         entrypoint: >
             /bin/bash -c "ls && cd tt/cmake_targets/ran_build/build/ &&
-            ./nr-uesoftmodem --uicc0.imsi 001010000000011 -C 3619200000 -r 106 --numerology 1 --ssb 516 -E --sa --rfsim --rfsimulator.options chanmod -O ../../../ci-scripts/conf_files/nrue.uicc.conf --TAP 100 --rfsimulator.serveraddr 192.168.70.140 &&
+            ./nr-uesoftmodem --uicc0.imsi 001010000000011 -C 3619200000 -r 106 --numerology 1 --ssb 516 -E --sa --rfsim --rfsimulator.options chanmod -O ../../../ci-scripts/conf_files/nrue.uicc.conf --TAP 0 --rfsimulator.serveraddr 192.168.70.140 &&
             exec /bin/bash"
         # entrypoint: /bin/bash
         stdin_open: true  
@@ -90,7 +90,7 @@ services:
             - ../../../logs_ue:/opt/oai-nr-ue/etc/logs
         entrypoint: >
             /bin/bash -c "ls && cd tt/cmake_targets/ran_build/build/ &&
-            ./nr-uesoftmodem --uicc0.imsi 001010000000012 -C 3619200000 -r 106 --numerology 1 --ssb 516 -E --sa --rfsim --rfsimulator.options chanmod -O ../../../ci-scripts/conf_files/nrue.uicc.conf --TAP 100 --rfsimulator.serveraddr 192.168.70.140 &&
+            ./nr-uesoftmodem --uicc0.imsi 001010000000012 -C 3619200000 -r 106 --numerology 1 --ssb 516 -E --sa --rfsim --rfsimulator.options chanmod -O ../../../ci-scripts/conf_files/nrue.uicc.conf --TAP 0 --rfsimulator.serveraddr 192.168.70.140 &&
             exec /bin/bash"
         # entrypoint: /bin/bash
         stdin_open: true  
@@ -124,7 +124,7 @@ services:
             - ../../../logs_ue:/opt/oai-nr-ue/etc/logs
         entrypoint: >
             /bin/bash -c "ls && cd tt/cmake_targets/ran_build/build/ &&
-            ./nr-uesoftmodem --uicc0.imsi 001010000000013 -C 3619200000 -r 106 --numerology 1 --ssb 516 -E --sa --rfsim --rfsimulator.options chanmod -O ../../../ci-scripts/conf_files/nrue.uicc.conf --TAP 100 --rfsimulator.serveraddr 192.168.70.140 &&
+            ./nr-uesoftmodem --uicc0.imsi 001010000000013 -C 3619200000 -r 106 --numerology 1 --ssb 516 -E --sa --rfsim --rfsimulator.options chanmod -O ../../../ci-scripts/conf_files/nrue.uicc.conf --TAP 0 --rfsimulator.serveraddr 192.168.70.140 &&
             exec /bin/bash"
         # entrypoint: /bin/bash
         stdin_open: true  
@@ -158,7 +158,7 @@ services:
             - ../../../logs_ue:/opt/oai-nr-ue/etc/logs
         entrypoint: >
             /bin/bash -c "ls && cd tt/cmake_targets/ran_build/build/ &&
-            ./nr-uesoftmodem --uicc0.imsi 001010000000014 -C 3619200000 -r 106 --numerology 1 --ssb 516 -E --sa --rfsim --rfsimulator.options chanmod -O ../../../ci-scripts/conf_files/nrue.uicc.conf --TAP 100 --rfsimulator.serveraddr 192.168.70.140 &&
+            ./nr-uesoftmodem --uicc0.imsi 001010000000014 -C 3619200000 -r 106 --numerology 1 --ssb 516 -E --sa --rfsim --rfsimulator.options chanmod -O ../../../ci-scripts/conf_files/nrue.uicc.conf --TAP 0 --rfsimulator.serveraddr 192.168.70.140 &&
             exec /bin/bash"
         # entrypoint: /bin/bash
         stdin_open: true  
@@ -192,7 +192,7 @@ services:
             - ../../../logs_ue:/opt/oai-nr-ue/etc/logs
         entrypoint: >
             /bin/bash -c "ls && cd tt/cmake_targets/ran_build/build/ &&
-            ./nr-uesoftmodem --uicc0.imsi 001010000000015 -C 3619200000 -r 106 --numerology 1 --ssb 516 -E --sa --rfsim --rfsimulator.options chanmod -O ../../../ci-scripts/conf_files/nrue.uicc.conf --TAP 100 --rfsimulator.serveraddr 192.168.70.140 &&
+            ./nr-uesoftmodem --uicc0.imsi 001010000000015 -C 3619200000 -r 106 --numerology 1 --ssb 516 -E --sa --rfsim --rfsimulator.options chanmod -O ../../../ci-scripts/conf_files/nrue.uicc.conf --TAP 0 --rfsimulator.serveraddr 192.168.70.140 &&
             exec /bin/bash"
         # entrypoint: /bin/bash
         stdin_open: true  
