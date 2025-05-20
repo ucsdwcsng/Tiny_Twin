@@ -314,7 +314,7 @@ def autoUE():
             time.sleep(5)
             os.system(f"""top -bn6 > ./plot/ue{kk}_{ktap}/iperf_cpumem.txt """)
             #test
-            time.sleep(240)
+            time.sleep(20)
             print("kill gnb")
             os.system(f"docker exec tt-gnb chmod +x stop.sh ")
             os.system(f"docker exec -d tt-gnb ./stop.sh ")
