@@ -49,6 +49,7 @@
 #include "F1AP_CauseRadioNetwork.h"
 
 #include "T.h"
+#include <float.h>
 
 #include "uper_encoder.h"
 #include "uper_decoder.h"
@@ -60,6 +61,7 @@
 #include "nfapi/oai_integration/vendor_ext.h"
 
 #include "common/utils/alg/find.h"
+#include "./../../../executables/edgeric/wrapper.h"
 
 //#define DEBUG_DCI
 
@@ -678,6 +680,96 @@ bool nr_find_nb_rb(uint16_t Qm,
   return *tbs >= bytes && *nb_rb <= nb_rb_max;
 }
 
+bool nr_find_nb_rb_new(const rnti_t rnti,
+                   uint16_t Qm,
+                   uint16_t R,
+                   long transform_precoding,
+                   uint8_t nrOfLayers,
+                   uint16_t nb_symb_sch,
+                   uint16_t nb_dmrs_prb,
+                   uint32_t bytes,
+                   uint16_t nb_rb_min,
+                   uint16_t nb_rb_max,
+                   int rb_total_num,
+                   uint32_t *tbs,
+                   uint16_t *nb_rb)
+{
+
+  //////////////////////////////////////////////////////////////////////////////////////////////////
+
+  
+  float opt_weights_recvd = ric_get_weights(agent, rnti);
+  float weights_to_log;
+  //printf("weight in prim %f rnti:%d\n",opt_weights_recvd,rnti);
+  if(opt_weights_recvd != FLT_MAX)
+    weights_to_log = opt_weights_recvd;
+  else
+    weights_to_log = -3.0f;
+
+  float weights_recvd;
+  if(weights_to_log>=0){
+    weights_recvd = opt_weights_recvd;
+    nb_rb_max = weights_recvd * rb_total_num; 
+  }
+  
+  ////////////////////////////////////////////////////////////////////////////////////////////////////
+  // for transform precoding only RB = 2^a_2 * 3^a_3 * 5^a_5 is allowed with a non-negative
+  while(transform_precoding == NR_PUSCH_Config__transformPrecoder_enabled &&
+        !multiple_2_3_5(nb_rb_max))
+    nb_rb_max--;
+
+  /* is the maximum (not even) enough? */
+  *nb_rb = nb_rb_max;
+  
+  *tbs = nr_compute_tbs(Qm, R, *nb_rb, nb_symb_sch, nb_dmrs_prb, 0, 0, nrOfLayers) >> 3;
+  /* check whether it does not fit, or whether it exactly fits. Some algorithms
+   * might depend on the return value! */
+  if (bytes > *tbs)
+    return true;
+  if (bytes == *tbs)
+    return true;
+
+  /* is the minimum enough? */
+  *nb_rb = nb_rb_min;
+  
+  *tbs = nr_compute_tbs(Qm, R, *nb_rb, nb_symb_sch, nb_dmrs_prb, 0, 0, nrOfLayers) >> 3;
+  if (bytes <= *tbs)
+    return true;
+
+  /* perform binary search to allocate all bytes within a TBS up to nb_rb_max
+   * RBs */
+  int hi = nb_rb_max;
+  int lo = nb_rb_min;
+
+  for (int p = (hi + lo) / 2; lo + 1 < hi; p = (hi + lo) / 2) {
+    // for transform precoding only RB = 2^a_2 * 3^a_3 * 5^a_5 is allowed with a non-negative
+    while(transform_precoding == NR_PUSCH_Config__transformPrecoder_enabled &&
+          !multiple_2_3_5(p))
+      p++;
+
+    // If by increasing p for transform precoding we already hit the high, break to avoid infinite loop
+    if (p == hi)
+      break;
+
+    const uint32_t TBS = nr_compute_tbs(Qm, R, p, nb_symb_sch, nb_dmrs_prb, 0, 0, nrOfLayers) >> 3;
+    if (bytes == TBS) {
+      hi = p;
+      break;
+    } else if (bytes < TBS) {
+      hi = p;
+    } else {
+      lo = p;
+    }
+  }
+  
+  //*nb_rb = hi;
+  *tbs = nr_compute_tbs(Qm, R, *nb_rb, nb_symb_sch, nb_dmrs_prb, 0, 0, nrOfLayers) >> 3;
+  /* return whether we could allocate all bytes and stay below nb_rb_max */
+  return *tbs >= bytes && *nb_rb <= nb_rb_max;
+  
+}
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
 const NR_DMRS_UplinkConfig_t *get_DMRS_UplinkConfig(const NR_PUSCH_Config_t *pusch_Config, const NR_tda_info_t *tda_info)
 {
   if (pusch_Config == NULL)
@@ -775,6 +867,57 @@ int get_mcs_from_bler(const NR_bler_options_t *bler_options,
         frame, old_mcs, new_mcs, num_dl_sched, num_dl_retx, bler_window, bler_stats->bler);
   return new_mcs;
 }
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////
+int get_mcs_from_bler_new(int rnti,         /////////////////////// add
+                      const NR_bler_options_t *bler_options,
+                      const NR_mac_dir_stats_t *stats,
+                      NR_bler_stats_t *bler_stats,
+                      int max_mcs,
+                      frame_t frame)
+{
+  /* first call: everything is zero. Initialize to sensible default */
+  if (bler_stats->last_frame == 0 && bler_stats->mcs == 0) {
+    bler_stats->last_frame = frame;
+    bler_stats->mcs = 9;
+    bler_stats->bler = (bler_options->lower + bler_options->upper) / 2.0f;
+  }
+  int diff = frame - bler_stats->last_frame;
+  if (diff < 0) // wrap around
+    diff += 1024;
+
+  max_mcs = min(max_mcs, bler_options->max_mcs);
+  const uint8_t old_mcs = min(bler_stats->mcs, max_mcs);
+  if (diff < BLER_UPDATE_FRAME)
+    return old_mcs; // no update
+
+  // last update is longer than x frames ago
+  const int num_dl_sched = (int)(stats->rounds[0] - bler_stats->rounds[0]);
+  const int num_dl_retx = (int)(stats->rounds[1] - bler_stats->rounds[1]);
+  const float bler_window = num_dl_sched > 0 ? (float) num_dl_retx / num_dl_sched : bler_stats->bler;
+  bler_stats->bler = BLER_FILTER * bler_stats->bler + (1 - BLER_FILTER) * bler_window;
+
+  int new_mcs = old_mcs;
+  if (bler_stats->bler < bler_options->lower && old_mcs < max_mcs && num_dl_sched > 3)
+    new_mcs += 1;
+  else if ((bler_stats->bler > bler_options->upper && old_mcs > 6) // above threshold
+      || (num_dl_sched <= 3 && old_mcs > 9))                                // no activity
+    new_mcs -= 1;
+  // else we are within threshold boundaries
+//////////////////////////////////////////////////////////////////////////////////////
+  uint8_t opt_mcs_recvd = ric_get_mcs(agent, rnti);
+  //printf("opt mcs from prim %d\n", opt_mcs_recvd);
+  if(opt_mcs_recvd != 255)
+    new_mcs = opt_mcs_recvd;
+///////////////////////////////////////////////////////////////////////////////////////
+  bler_stats->last_frame = frame;
+  bler_stats->mcs = new_mcs;
+  memcpy(bler_stats->rounds, stats->rounds, sizeof(stats->rounds));
+  LOG_D(MAC, "frame %4d MCS %d -> %d (num_dl_sched %d, num_dl_retx %d, BLER wnd %.3f avg %.6f)\n",
+        frame, old_mcs, new_mcs, num_dl_sched, num_dl_retx, bler_window, bler_stats->bler);
+  return new_mcs;
+}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 void config_uldci(const NR_UE_ServingCell_Info_t *sc_info,
                   const nfapi_nr_pusch_pdu_t *pusch_pdu,

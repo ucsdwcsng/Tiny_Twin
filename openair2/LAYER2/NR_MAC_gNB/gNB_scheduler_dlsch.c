@@ -44,6 +44,7 @@
 #include "executables/softmodem-common.h"
 #include "../../../nfapi/oai_integration/vendor_ext.h"
 #include <time.h>
+#include "./../../../executables/edgeric/wrapper.h"
 
 ////////////////////////////////////////////////////////
 /////* DLSCH MAC PDU generation (6.1.2 TS 38.321) */////
@@ -385,6 +386,12 @@ static void nr_store_dlsch_buffer(module_id_t module_id, frame_t frame, sub_fram
 
       sched_ctrl->dl_pdus_total += sched_ctrl->rlc_status[lcid].pdus_in_buffer;
       sched_ctrl->num_total_bytes += sched_ctrl->rlc_status[lcid].bytes_in_buffer;
+      ////////////////////////////////////////////////////////////////////////////////////////////////
+    
+      ric_set_dl_buffer(agent, rnti, sched_ctrl->rlc_status[lcid].bytes_in_buffer);
+      
+      ////////////////////////////////////////////////////////////////////////////////////////////////
+      
       LOG_D(MAC,
             "[gNB %d][%4d.%2d] %s%d->DLSCH, RLC status for UE %d: %d bytes in buffer, total DL buffer size = %d bytes, %d total PDU bytes, %s TA command\n",
             module_id,
@@ -655,6 +662,9 @@ static void pf_dl(module_id_t module_id,
   int curUE = 0;
   int CC_id = 0;
 
+  /////////////////////////////////////////////////////////////////////////////////////////////////////////
+  ric_get_mcs_from_er(agent);
+  /////////////////////////////////////////////////////////////////////////////////////////////////////////
   /* Loop UE_info->list to check retransmission */
   UE_iterator(UE_list, UE) {
     // log whether or not an ACK was receieved from a certain UE
@@ -682,6 +692,13 @@ static void pf_dl(module_id_t module_id,
     const float a = 0.01f;
     const uint32_t b = UE->mac_stats.dl.current_bytes;
     UE->dl_thr_ue = (1 - a) * UE->dl_thr_ue + a * b;
+
+    //////////////////////////////parameter：tbs(tx_bytes)//////////////////////////////
+    ric_set_tx_bytes(agent, UE -> rnti, UE -> dl_thr_ue);
+    ric_set_snr(agent, UE -> rnti, sched_ctrl->pusch_snrx10 / 10);
+    ric_set_cqi(agent, UE -> rnti, sched_ctrl->CSI_report.cri_ri_li_pmi_cqi_report.wb_cqi_1tb);
+    /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    
 
     // log SNR //
     if (snrlog){
@@ -750,7 +767,10 @@ static void pf_dl(module_id_t module_id,
         sched_pdsch->mcs = min(bo->max_mcs, max_mcs);
         sched_ctrl->dl_bler_stats.mcs = sched_pdsch->mcs;
       } else
-        sched_pdsch->mcs = get_mcs_from_bler(bo, stats, &sched_ctrl->dl_bler_stats, max_mcs, frame);
+      /////////////////////////////////////////////////////////////////////////////////////////////////////////
+        sched_pdsch->mcs = get_mcs_from_bler_new(UE->rnti,bo, stats, &sched_ctrl->dl_bler_stats, max_mcs, frame);
+      ///////////////////////////////////// 
+        // sched_pdsch->mcs = get_mcs_from_bler(bo, stats, &sched_ctrl->dl_bler_stats, max_mcs, frame);
 
       // // log DL MCS // //
       if (mcslog){
@@ -773,6 +793,13 @@ static void pf_dl(module_id_t module_id,
                                     0 /* N_PRB_oh, 0 for initialBWP */,
                                     0 /* tb_scaling */,
                                     sched_pdsch->nrOfLayers) >> 3;
+
+      //////////////////////////////parameter：tbs(dl_tbs)//////////////////////////////
+
+      ric_set_dl_tbs(agent, UE -> rnti, tbs*1.0000001);
+      
+      ///////////////////////////////////////////////////////////////////////////////////////////////
+      
 
       float coeff_ue = (float) tbs / UE->dl_thr_ue;
       LOG_D(NR_MAC, "[UE %04x][%4d.%2d] b %d, thr_ue %f, tbs %d, coeff_ue %f\n",
@@ -808,6 +835,15 @@ static void pf_dl(module_id_t module_id,
   }
 
   const int min_rbSize = 5;
+  ////////////////////////////////////////////////////////////////////////////////////////////////////
+  tti_counter=tti_counter+1;
+  ric_setTTI(agent, tti_counter);
+  ric_send_to_er(agent);
+  int rb_total_num=0;
+  int first_time_flag=0;
+  ric_get_weights_from_er(agent);
+  ////////////////////////////////////////////////////////////////////////////////////////////////////
+  
 
   /* Loop UE_sched to find max coeff and allocate transmission */
   while (remainUEs> 0 && n_rb_sched >= min_rbSize && iterator->UE != NULL) {
@@ -920,7 +956,8 @@ static void pf_dl(module_id_t module_id,
     // PDUs, we replace with 3 * numPDUs
     const int oh = 3 * 4 + 2 * (frame == (sched_ctrl->ta_frame + 100) % 1024);
     //const int oh = 3 * sched_ctrl->dl_pdus_total + 2 * (frame == (sched_ctrl->ta_frame + 100) % 1024);
-    nr_find_nb_rb(sched_pdsch->Qm,
+    nr_find_nb_rb_new(rnti,  /////////////// add
+                  sched_pdsch->Qm,
                   sched_pdsch->R,
                   1, // no transform precoding for DL
                   sched_pdsch->nrOfLayers,
@@ -929,8 +966,24 @@ static void pf_dl(module_id_t module_id,
                   sched_ctrl->num_total_bytes + oh,
                   min_rbSize,
                   max_rbSize,
+                  rb_total_num, /////////////////add
                   &TBS,
                   &rbSize);
+    
+    //printf("TBS for %d: %d\n", rnti, TBS);
+    //printf("rbSIZE for %d: %d\n", rnti, rbSize);
+
+    // nr_find_nb_rb(sched_pdsch->Qm,
+    //               sched_pdsch->R,
+    //               1, // no transform precoding for DL
+    //               sched_pdsch->nrOfLayers,
+    //               tda_info->nrOfSymbols,
+    //               sched_pdsch->dmrs_parms.N_PRB_DMRS * sched_pdsch->dmrs_parms.N_DMRS_SLOT,
+    //               sched_ctrl->num_total_bytes + oh,
+    //               min_rbSize,
+    //               max_rbSize,
+    //               &TBS,
+    //               &rbSize);
     sched_pdsch->rbSize = rbSize;
     sched_pdsch->rbStart = rbStart;
     sched_pdsch->tb_size = TBS;

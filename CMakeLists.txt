@@ -24,7 +24,7 @@
 cmake_minimum_required (VERSION 3.16)
 project (OpenAirInterface LANGUAGES C CXX)
 set(CMAKE_CXX_STANDARD 17)
-
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
 #########################################################
 # Base directories, compatible with legacy OAI building #
 #########################################################
@@ -1997,7 +1997,7 @@ target_link_libraries(lte-uesoftmodem PRIVATE asn1_nr_rrc_hdrs asn1_lte_rrc_hdrs
 # force the generation of ASN.1 so that we don't need to wait during the build
 target_link_libraries(lte-uesoftmodem PRIVATE
                       asn1_lte_rrc asn1_s1ap asn1_m2ap asn1_m3ap asn1_x2ap)
-
+add_subdirectory(${OPENAIR_DIR}/executables/edgeric)
 # nr-softmodem
 ###################################################
 
@@ -2030,6 +2030,9 @@ target_link_libraries(nr-softmodem PRIVATE ${T_LIB})
 target_link_libraries(nr-softmodem PRIVATE asn1_nr_rrc_hdrs asn1_lte_rrc_hdrs)
 target_link_libraries(nr-softmodem PRIVATE asn1_nr_rrc_hdrs asn1_lte_rrc_hdrs)
 add_boolean_option(OAI_AERIAL OFF "Activate OAI's AERIAL driver" OFF)
+
+target_link_libraries(nr-softmodem PRIVATE edgericc) 
+
 if (OAI_AERIAL)
   target_compile_definitions(nr-softmodem PUBLIC ENABLE_AERIAL)
   target_link_libraries(nr-softmodem PUBLIC aerial_lib)

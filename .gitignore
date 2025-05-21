@@ -8,7 +8,7 @@ cmake_targets/ran_build/
 cmake_targets/nas_sim_tools/build/
 logs/
 lte_build_oai/
-#channel/
+channel/
 
 # IDE files
 .vscode

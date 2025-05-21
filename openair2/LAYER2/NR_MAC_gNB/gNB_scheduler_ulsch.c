@@ -37,6 +37,7 @@
 #include "LAYER2/NR_MAC_COMMON/nr_mac_extern.h"
 #include "LAYER2/nr_rlc/nr_rlc_oai_api.h"
 #include "LAYER2/RLC/rlc.h"
+#include "./../../../executables/edgeric/wrapper.h"
 
 // #define SRS_IND_DEBUG
 
@@ -1845,7 +1846,11 @@ static void pf_ul(module_id_t module_id,
     const float a = 0.01f;
     const uint32_t b = stats->current_bytes;
     UE->ul_thr_ue = (1 - a) * UE->ul_thr_ue + a * b;
-
+    ////////////////////////////////////////////////////
+   
+    ric_set_rx_bytes(agent, UE -> rnti, UE->ul_thr_ue);
+   
+    /////////////////////////////////////////////////////
     // // log UL TPT // //
     if (tptlog){
         fprintf(fpsnr, "TTI Index: %d\n", tti_counter);
@@ -2388,6 +2393,9 @@ void nr_schedule_ulsch(module_id_t module_id, frame_t frame, sub_frame_t slot, n
       cur_harq->sched_pusch.nrOfLayers = sched_pusch->nrOfLayers;
       sched_ctrl->sched_ul_bytes += sched_pusch->tb_size;
       UE->mac_stats.ul.total_rbs += sched_pusch->rbSize;
+      //////////////////////////////////////////////
+      ric_set_ul_buffer(agent, UE->rnti, sched_ctrl->sched_ul_bytes);
+      //////////////////////////////////////////////
 
     } else {
       LOG_D(NR_MAC,

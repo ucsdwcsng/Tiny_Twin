@@ -85,6 +85,7 @@ unsigned short config_frames[4] = {2,9,11,13};
 #include "gnb_config.h"
 #include "openair2/E1AP/e1ap_common.h"
 #include "LAYER2/NR_MAC_gNB/nr_mac_gNB.h"
+#include "./edgeric/wrapper.h"
 #ifdef ENABLE_AERIAL
 #include "nfapi/oai_integration/aerial/fapi_nvIPC.h"
 #endif
@@ -92,6 +93,9 @@ unsigned short config_frames[4] = {2,9,11,13};
 #include "openair2/E2AP/flexric/src/agent/e2_agent_api.h"
 #include "openair2/E2AP/RAN_FUNCTION/init_ran_func.h"
 #endif
+
+EdgeRIC* agent;
+int tti_counter=0;
 
 extern FILE *fplog2;
 extern FILE *fpi[50];
@@ -138,7 +142,6 @@ FILE *fpdltpt;
 FILE *fpulmcs;
 FILE *fpdlmcs;
 FILE *fptti;
-int tti_counter=0;
 int first_time=0;
 int gnb1_ue0=1;
 
@@ -646,6 +649,11 @@ static void initialize_agent(ngran_node_t node_type, e2_agent_args_t oai_args)
 void init_eNB_afterRU(void);
 configmodule_interface_t *uniqCfg = NULL;
 int main( int argc, char **argv ) {
+
+  agent = ric_create();
+  ric_init(agent);
+
+
   int ru_id, CC_id = 0;
   start_background_system();
 
@@ -924,7 +932,7 @@ int main( int argc, char **argv ) {
     if (RC.ru[ru_id]->ifdevice.trx_end_func)
       RC.ru[ru_id]->ifdevice.trx_end_func(&RC.ru[ru_id]->ifdevice);
   }
-
+  ric_destroy(agent);
   free(pckg);
   logClean();
   for (int i=0;i<50;i++){
