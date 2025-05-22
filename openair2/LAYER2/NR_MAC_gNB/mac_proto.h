@@ -429,12 +429,35 @@ bool nr_find_nb_rb(uint16_t Qm,
                    uint16_t nb_rb_max,
                    uint32_t *tbs,
                    uint16_t *nb_rb);
+/////////////////////////////////////////////////////////////////////////////////////////////////////
+bool nr_find_nb_rb_new(const rnti_t rnti, //////////////// add 
+                   uint16_t Qm,
+                   uint16_t R,
+                   long transform_precoding,
+                   uint8_t nrOfLayers,
+                   uint16_t nb_symb_sch,
+                   uint16_t nb_dmrs_prb,
+                   uint32_t bytes,
+                   uint16_t nb_rb_min,
+                   uint16_t nb_rb_max,
+                   int rb_total_num,   ////////////////////// add 
+                   uint32_t *tbs,
+                   uint16_t *nb_rb);
+
 
 int get_mcs_from_bler(const NR_bler_options_t *bler_options,
                       const NR_mac_dir_stats_t *stats,
                       NR_bler_stats_t *bler_stats,
                       int max_mcs,
                       frame_t frame);
+///////////////////////////////////////////////////////////////////////////////////
+int get_mcs_from_bler_new(int rnti,         /////////////////////// add
+                      const NR_bler_options_t *bler_options,
+                      const NR_mac_dir_stats_t *stats,
+                      NR_bler_stats_t *bler_stats,
+                      int max_mcs,
+                      frame_t frame);
+///////////////////////////////////////////////////////////////////////////////////
 
 int ul_buffer_index(int frame, int slot, int scs, int size);
 void UL_tti_req_ahead_initialization(gNB_MAC_INST *gNB, int n, int CCid, frame_t frameP, int slotP);

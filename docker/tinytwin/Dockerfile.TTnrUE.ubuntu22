@@ -4,7 +4,7 @@
 #
 #---------------------------------------------------------------------
 
-FROM ubuntu:jammy AS tt-nrue
+FROM ubuntu:24.04 AS tt-nrue
 
 ARG NEEDED_GIT_PROXY
 ARG TARGETARCH
@@ -40,8 +40,9 @@ RUN apt-get update && \
         libforms-dev \
         # python3-pip for conf template generation
         python3-pip && \
-    update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-12 100 --slave /usr/bin/g++ g++ /usr/bin/g++-12 && \
-    pip3 install --ignore-installed pyyaml
+    update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-12 100 --slave /usr/bin/g++ g++ /usr/bin/g++-12 
+    #&& \
+    #pip3 install --ignore-installed pyyaml
 
 # Add "Tini - A tiny but valid init for containers", https://github.com/krallin/tini
 # it will be copied into target containers, to print exit numbers and handle signals properly
@@ -79,23 +80,7 @@ RUN apt-get update && apt-get install -y \
     
 ENV CMAKE_PREFIX_PATH=/usr/include/yaml-cpp
     
-# build all targets so final targets can be created afterwards
-RUN /bin/sh oaienv && \
-    cd cmake_targets && \
-    mkdir -p log && \
-    ./build_oai -C && \
-    ./build_oai -I -w SIMU \
-        --gNB --nrUE \
-        --build-lib "telnetsrv enbscope uescope nrscope" \
-        --cmake-opt -DXAPP_MULTILANGUAGE=OFF --cmake-opt -DKPM_VERSION=$KPM_VERSION --cmake-opt -DE2AP_VERSION=$E2AP_VERSION \
-        --cmake-opt -DCMAKE_C_FLAGS="-w" --cmake-opt -DCMAKE_CXX_FLAGS="-w" $BUILD_OPTION && \
-    #     #--cmake-opt -DCMAKE_C_FLAGS="-Werror" --cmake-opt -DCMAKE_CXX_FLAGS="-Werror" $BUILD_OPTION && \
-    # Mainly to see if the sanitize option was perfectly executed
-    echo "---- ldd on executables ----" && \
-    ldd ran_build/build/*softmodem* ran_build/build/nr-cuup && \
-    # ran_build/build/oairu && \
-    echo "---- ldd on shared libraries ----" && \
-    ldd ran_build/build/*.so
+
     
 RUN apt-get update && \
     DEBIAN_FRONTEND=noninteractive apt-get upgrade --yes && \
@@ -133,6 +118,31 @@ RUN apt-get update && \
         liblapacke; fi' && \
     apt-get clean -y && \
     rm -rf /var/lib/apt/lists/*
+
+RUN apt-get update && apt-get install -y \
+    protobuf-compiler \
+    libprotobuf-dev \
+    libprotoc-dev
+RUN apt-get install -y libzmq3-dev
+
+
+    # build all targets so final targets can be created afterwards
+RUN /bin/sh oaienv && \
+    cd cmake_targets && \
+    mkdir -p log && \
+    ./build_oai -C && \
+    ./build_oai -I -w SIMU \
+        --gNB --nrUE \
+        --build-lib "telnetsrv enbscope uescope nrscope" \
+        --cmake-opt -DXAPP_MULTILANGUAGE=OFF --cmake-opt -DKPM_VERSION=$KPM_VERSION --cmake-opt -DE2AP_VERSION=$E2AP_VERSION \
+        --cmake-opt -DCMAKE_C_FLAGS="-w" --cmake-opt -DCMAKE_CXX_FLAGS="-w" $BUILD_OPTION && \
+    #     #--cmake-opt -DCMAKE_C_FLAGS="-Werror" --cmake-opt -DCMAKE_CXX_FLAGS="-Werror" $BUILD_OPTION && \
+    # Mainly to see if the sanitize option was perfectly executed
+    echo "---- ldd on executables ----" && \
+    ldd ran_build/build/*softmodem* ran_build/build/nr-cuup && \
+    # ran_build/build/oairu && \
+    echo "---- ldd on shared libraries ----" && \
+    ldd ran_build/build/*.so
 
 WORKDIR /opt/tt-ran/tt
 # COPY --from=gnb-build \

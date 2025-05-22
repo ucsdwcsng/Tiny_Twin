@@ -16,7 +16,7 @@ end_tap = int(sys.argv[2])
 start='''
 services:
     tt-gnb:
-        image: tt-gnb:v2
+        image: tt-gnb:vRIC
         container_name: tt-gnb
         privileged: true
         cap_drop:
@@ -55,6 +55,45 @@ services:
 
 '''
 end='''
+    edgeric:
+        container_name: edgeric_v2_2
+        # Build info
+        image: edgeric/v2
+        build:
+            context: edgeric-v2
+            dockerfile: ../Dockerfile-edgeric
+            args:
+                OS_VERSION: "24.04"
+        # privileged mode is requred only for accessing usb devices
+        privileged: true
+        # ports:
+        #     - "8000:8000"
+        # entrypoint: ["/home/EdgeRIC-A-real-time-RIC/srsran_entrypoint.sh"]
+        # Extra capabilities always required
+        cap_add:
+            - SYS_NICE
+            - CAP_SYS_PTRACE
+        volumes:
+            # - ${pwd}/radio_network:/home/EdgeRIC-A-real-time-RIC:rw
+            - /tmp/.X11-unix:/tmp/.X11-unix:rw
+            - /dev:/dev
+            # - ${PWD:-.}:/home/EdgeRIC-A-real-time-RIC:rw
+            - ./edgeric-v2:/home/EdgeRIC:rw
+        # It creates a file/folder into /config_name inside the container
+        # Its content would be the value of the file used to create the config
+        # configs:
+        #   - gnb_config.yml
+        # Customize your desired network mode.
+        # current netowrk configuration creastes a private netwoek with both containers attached
+        # An alterantive would be `network: host"`. That would expose your host network into the container. It's the easiest to use if the 5gc is not in your PC
+        networks:
+            public_net:
+                ipv4_address: 192.168.70.166
+        # Start GNB container after 5gc is up and running
+        # depends_on:
+        #   gnb:
+        #     condition: service_healthy
+
 
 networks:
     public_net:
@@ -282,6 +321,8 @@ def autoUE():
             with open("./docker-compose.yaml","+w") as f:
                 f.write(file)
             os.system(f"docker compose up -d tt-gnb")
+            time.sleep(10)
+            os.system(f"docker compose up -d edgeric")
             print("set up ran")
             time.sleep(10)
             os.system(f"docker exec tt-gnb chmod +x run.sh build.sh")
