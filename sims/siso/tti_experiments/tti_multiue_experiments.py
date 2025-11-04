@@ -307,6 +307,8 @@ def autoUE():
         for kk in range(start_ue,end_ue+1,3):
             os.makedirs(f"./plot/ue{kk}_{ktap}", exist_ok=True)
             os.system("docker compose -f ../../oai-cn/docker-compose.yaml up -d")
+            os.system("docker compose -f /home/wcsng5g/tinytwin-oai/sims/siso/tti_experiments/edgeric-v2/muApp3/docker/prometheus/docker-compose.yml up -d")
+            os.system("docker compose -f /home/wcsng5g/tinytwin-oai/sims/siso/tti_experiments/edgeric-v2/muApp3/docker/grafana/docker-compose.yml up -d")
             while flag == 0:
                 time.sleep(2)
             
@@ -362,7 +364,10 @@ def autoUE():
             time.sleep(5)
 
             os.system(f"docker compose down")
+            os.system("docker compose -f /home/wcsng5g/tinytwin-oai/sims/siso/tti_experiments/edgeric-v2/muApp3/docker/grafana/docker-compose.yml down")
+            os.system("docker compose -f /home/wcsng5g/tinytwin-oai/sims/siso/tti_experiments/edgeric-v2/muApp3/docker/prometheus/docker-compose.yml down")
             os.system("docker compose -f ../../oai-cn/docker-compose.yaml down")
+
 
             flag=0
         

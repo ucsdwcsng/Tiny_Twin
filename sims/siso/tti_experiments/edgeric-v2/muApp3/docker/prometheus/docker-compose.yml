@@ -1,0 +1,30 @@
+services:
+  prometheus:
+    image: prom/prometheus
+    container_name: prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.console.libraries=/usr/share/prometheus/console_libraries'
+      - '--web.console.templates=/usr/share/prometheus/consoles'
+      - '--web.enable-lifecycle'
+    ports:
+      - "9090:9090"
+    restart: unless-stopped
+    volumes:
+      - ./prometheus:/etc/prometheus
+      - prom_data:/prometheus
+      - ./prometheus_logs:/prometheus/logs
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    networks:
+      public_net:
+          ipv4_address: 192.168.70.167
+
+networks:
+    public_net:
+        driver: bridge
+        external: true
+        name:  oai-cn5g-public-net
+volumes:
+  prom_data:

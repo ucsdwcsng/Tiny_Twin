@@ -21,18 +21,18 @@ class EdgericMessenger:
         self.subscriber = self.context.socket(zmq.SUB)
         self.subscriber.setsockopt_string(zmq.SUBSCRIBE, "")  # Subscribe to all messages
         self.subscriber.setsockopt(zmq.CONFLATE, 1)  # Set the socket to conflate mode
-        self.subscriber.connect("ipc:///tmp/metrics")  # Connect to the IPC address for metrics (5551)
+        self.subscriber.connect("tcp://192.168.70.140:5555")  # Connect to the IPC address for metrics (5551)
 
         self.socket_type = socket_type
 
         if socket_type == "weights":
             # Create a publisher socket for SchedulingWeights
             self.publisher_socket = self.context.socket(zmq.PUB)
-            self.publisher_socket.bind("ipc:///tmp/control_weights_actions")  # Bind to the IPC address for weights (5552)
+            self.publisher_socket.bind("tcp://192.168.70.166:5556")  # Bind to the IPC address for weights (5552)
         elif socket_type == "mcs":
             # Create a publisher socket for MCS
             self.publisher_socket = self.context.socket(zmq.PUB)
-            self.publisher_socket.bind("ipc:///tmp/control_mcs_actions")  # Bind to the IPC address for MCS (5553)
+            self.publisher_socket.bind("tcp://192.168.70.166:5557")  # Bind to the IPC address for MCS (5553)
 
         self.ue_dict = {}
         self.ran_tti = 0
