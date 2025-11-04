@@ -110,6 +110,7 @@ extern FILE *fpultpt;
 extern FILE *fpdltpt;
 extern FILE *fpulmcs;
 extern FILE *fpdlmcs;
+extern FILE *fpretx;
 extern const char *channel_file;
 extern int gnb1_ue0;
 
@@ -136,6 +137,7 @@ FILE *fplog3;
 FILE *fplog4;
 FILE *fpsnr;
 FILE *fprsrp;
+FILE *fpretx;
 FILE *fpcqi;
 FILE *fpultpt;
 FILE *fpdltpt;
@@ -671,6 +673,7 @@ int main( int argc, char **argv ) {
   fpsnr = fopen("../../../logs/snr.txt", "w"); // file the all UL parameters are written to
   fprsrp = fopen("../../../logs/rsrp.txt", "w");
   fptti = fopen("../../../logs/tti.txt", "w");
+  fpretx = fopen("../../../logs/drops.txt", "w");
     // fprsrp = fopen("../../../logs/rsrp.txt", "w");
   
   // fpcqi = fopen("../../../logs/ul_cqi.txt", "w"); // file the CQI is written to
@@ -950,6 +953,7 @@ int main( int argc, char **argv ) {
   fclose(fpdltpt);
   fclose(fpulmcs);
   fclose(fpdlmcs);
+  fclose(fpretx);
 
   printf("Bye.\n");
   return 0;

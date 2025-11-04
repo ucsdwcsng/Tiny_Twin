@@ -66,6 +66,7 @@ extern FILE *fpsnr;
 extern FILE *fpdltpt;
 extern FILE *fpdlmcs;
 extern FILE *fprsrp;
+extern FILE *fpretx;
 
 extern int snrlog;
 // extern int cqilog;
@@ -1048,6 +1049,10 @@ static void pf_dl(module_id_t module_id,
     ric_set_tx_bytes(agent, UE -> rnti, UE -> dl_thr_ue);
     ric_set_snr(agent, UE -> rnti, sched_ctrl->pusch_snrx10 / 10);
     ric_set_cqi(agent, UE -> rnti, sched_ctrl->CSI_report.cri_ri_li_pmi_cqi_report.wb_cqi_1tb);
+    
+    NR_bler_stats_t *bler_stats = &sched_ctrl->dl_bler_stats;
+    int num_dl_retx = (int)(stats->rounds[1] - bler_stats->rounds[1]);
+    fprintf(fpretx, "%d %d\n", num_dl_retx, UE->rnti);
     /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     if (remainUEs == 0)
       continue;
@@ -1136,6 +1141,7 @@ static void pf_dl(module_id_t module_id,
   tti_counter=tti_counter+1;
   ric_setTTI(agent, tti_counter);
   ric_send_to_er(agent);
+  ric_printmyvariables(agent);
   int rb_total_num=0;
   int first_time_flag=0;
   ric_get_weights_from_er(agent);

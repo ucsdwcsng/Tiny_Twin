@@ -16,7 +16,7 @@ end_tap = int(sys.argv[2])
 start='''
 services:
     tt-gnb:
-        image: tt-gnb:vRIC
+        image: tt-gnb:v2
         container_name: tt-gnb
         privileged: true
         cap_drop:
@@ -338,7 +338,7 @@ def autoUE():
                 os.system(f"""docker exec -d tt-ue{jk-160} bash -c "ping 10.0.0.1 -c 50 > ./ul_ue{jk-160}.txt" """)
             time.sleep(1)
             os.system(f"""top -bn6 > ./plot/ue{kk}_{ktap}/ping_cpumem.txt """)
-            time.sleep(65)
+            time.sleep(180)
 
 
             for jk in range(161,161+kk): 

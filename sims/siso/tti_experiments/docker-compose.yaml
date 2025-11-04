@@ -1,7 +1,7 @@
 
 services:
     tt-gnb:
-        image: tt-gnb:vRIC
+        image: tt-gnb:v2
         container_name: tt-gnb
         privileged: true
         cap_drop:
