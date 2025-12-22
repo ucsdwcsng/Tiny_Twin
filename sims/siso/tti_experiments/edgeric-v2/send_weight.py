@@ -20,9 +20,11 @@ class SendWeight:
         # 17921, 0.7,  # RNTI 4601 with weight 0.7
         # 17922, 0.3,  # RNTI 4602 with weight 0.3  # RNTI 1003 with weight 0.2
         # ]   
+        t=12
         for rnti in ue_dict.keys():
             weight_value = np.random.rand()
-            weight_array.extend([rnti, weight_value])
+            weight_array.extend([rnti, t])
+            t=t
 
         return weight_array
 

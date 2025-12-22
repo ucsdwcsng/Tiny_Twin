@@ -108,16 +108,16 @@ class PrometheusMonitor:
         ul_buffer = metrics['ul_buffer']
         self.ul_buffer_history[rnti].append(ul_buffer)
 
-        if (self.tti_count - self.first_tti[rnti]) >= 2000:
-            total_time = 2
+        if (self.tti_count - self.first_tti[rnti]) >= 1000:
+            total_time = 1
             total_tx_bytes = sum(self.tx_bytes_history[rnti])
             total_rx_bytes = sum(self.rx_bytes_history[rnti])
             total_dl_buffer = sum(self.dl_buffer_history[rnti])
             total_ul_buffer = sum(self.ul_buffer_history[rnti])
             avg_tx_throughput = (total_tx_bytes * 8) / total_time
             avg_rx_throughput = (total_rx_bytes * 8) / total_time
-            avg_dl_buffer = (total_dl_buffer * 8) / total_time
-            avg_ul_buffer = (total_ul_buffer * 8) / total_time
+            avg_dl_buffer = (total_dl_buffer * 8) / (total_time*1000)
+            avg_ul_buffer = (total_ul_buffer * 8) / (total_time*1000)
             self.tx_bytes_history[rnti].pop(0)
             self.rx_bytes_history[rnti].pop(0)
             self.dl_buffer_history[rnti].pop(0)

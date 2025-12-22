@@ -66,8 +66,8 @@ end='''
                 OS_VERSION: "24.04"
         # privileged mode is requred only for accessing usb devices
         privileged: true
-        # ports:
-        #     - "8000:8000"
+        ports:
+            - "7000:7000"
         # entrypoint: ["/home/EdgeRIC-A-real-time-RIC/srsran_entrypoint.sh"]
         # Extra capabilities always required
         cap_add:
@@ -327,6 +327,7 @@ def autoUE():
             os.system(f"docker compose up -d edgeric")
             print("set up ran")
             time.sleep(10)
+            os.system(f"docker exec -d edgeric_v2_2 python3 ./muApp3/muApp3_monitor_grafana.py ")
             os.system(f"docker exec tt-gnb chmod +x run.sh build.sh")
             os.system(f"docker exec -d tt-gnb ./run.sh ")
             #os.system(f"docker exec -d tt-gnb  cd /opt/tt-ran/tt/cmake_targets/ran_build/build/ && ./nr-softmodem -O /opt/tt-ran/tt/targets/PROJECTS/GENERIC-NR-5GC/CONF/gnb.sa.band78.fr1.106PRB.usrpb210.conf --rfsim -E --sa  --rfsimulator.options chanmod --TAP 1 --TTI 1 --SNR 1 --MCS 1 --CQI 1 --TPT 1")
@@ -335,29 +336,29 @@ def autoUE():
                 time.sleep(min((i-160)*12,15))
                 #os.system(f"docker exec -it tt-ue{i} ifconfig oaitun_ue1| grep 'inet ' ")
 
-            for jk in range(161,161+kk): 
-                os.system(f"""docker exec -d oai-ext-dn bash -c "ping 10.0.0.{jk-159} -c 50 > ./dl_ue{jk-160}.txt" """)
-                os.system(f"""docker exec -d tt-ue{jk-160} bash -c "ping 10.0.0.1 -c 50 > ./ul_ue{jk-160}.txt" """)
-            time.sleep(1)
-            os.system(f"""top -bn6 > ./plot/ue{kk}_{ktap}/ping_cpumem.txt """)
-            time.sleep(180)
+            # for jk in range(161,161+kk): 
+            #     os.system(f"""docker exec -d oai-ext-dn bash -c "ping 10.0.0.{jk-159} -c 50 > ./dl_ue{jk-160}.txt" """)
+            #     os.system(f"""docker exec -d tt-ue{jk-160} bash -c "ping 10.0.0.1 -c 50 > ./ul_ue{jk-160}.txt" """)
+            # time.sleep(1)
+            # os.system(f"""top -bn6 > ./plot/ue{kk}_{ktap}/ping_cpumem.txt """)
+            # time.sleep(6)
 
 
-            for jk in range(161,161+kk): 
-                os.system(f"docker cp oai-ext-dn:/tmp/dl_ue{jk-160}.txt ./plot/ue{kk}_{ktap}/dl_ue{jk-160}.txt")
-                os.system(f"docker cp tt-ue{jk-160}:/opt/tt-ran/ul_ue{jk-160}.txt ./plot/ue{kk}_{ktap}/ul_ue{jk-160}.txt")
+            # for jk in range(161,161+kk): 
+            #     os.system(f"docker cp oai-ext-dn:/tmp/dl_ue{jk-160}.txt ./plot/ue{kk}_{ktap}/dl_ue{jk-160}.txt")
+            #     os.system(f"docker cp tt-ue{jk-160}:/opt/tt-ran/ul_ue{jk-160}.txt ./plot/ue{kk}_{ktap}/ul_ue{jk-160}.txt")
 
             for ik in range(161,161+kk): 
                 os.system(f"docker exec -d tt-ue{ik-160} iperf -s -u -i 1 -B 10.0.0.{ik-159} ")
                 os.system(f"docker exec -d oai-ext-dn iperf -s -i 1 -B 192.168.70.135 -p 52{ik-149}")
             time.sleep(2)
             for jk in range(161,161+kk): 
-                os.system(f"docker exec -d oai-ext-dn iperf -u -t 86400 -i 1 -fk -B 192.168.70.135 -b 2M -c 10.0.0.{jk-159}")
-                os.system(f"docker exec -d tt-ue{jk-160} iperf -t 86400 -i 1 -fk -c 192.168.70.135 -b 2M -B 10.0.0.{jk-159} -p 52{ik-149}")
+                os.system(f"docker exec -d oai-ext-dn iperf -u -t 86400 -i 1 -fk -B 192.168.70.135 -b 3M -c 10.0.0.{jk-159}")
+                os.system(f"docker exec -d tt-ue{jk-160} iperf -t 86400 -i 1 -fk -c 192.168.70.135 -b 3.5M -B 10.0.0.{jk-159} -p 52{ik-149}")
             time.sleep(5)
             os.system(f"""top -bn6 > ./plot/ue{kk}_{ktap}/iperf_cpumem.txt """)
             #test
-            time.sleep(20)
+            time.sleep(360)
             print("kill gnb")
             os.system(f"docker exec tt-gnb chmod +x stop.sh ")
             os.system(f"docker exec -d tt-gnb ./stop.sh ")
