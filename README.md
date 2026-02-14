@@ -98,3 +98,5 @@ Your email should contain below information:
 Always remember a structured email will help us understand your issues quickly.
 
 # tinytwin-oai
+
+Look at the z_docs folder for documentation on building and running 
