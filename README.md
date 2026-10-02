@@ -106,9 +106,12 @@ Look at the z_docs folder for documentation on building and running
 If you use Tiny-Twin in your research, please cite our paper:
 
 ```bibtex
-@inproceedings{mamaghani2026tinytwin,
+@inproceedings{mamaghani2026tiny,
   title={Tiny-Twin: A CPU-Native Full-stack Digital Twin for NextG Cellular Networks},
-  author={Mamaghani, Ali and Ghosh, Ushasi and Shakkottai, Srinivas and Bharadia, Dinesh and Jain, Ish },
-  booktitle={2026 IEEE International Symposium on Dynamic Spectrum Access Networks (DySPAN)},
-  year={2026}
+  author={Mamaghani, Ali and Ghosh, Ushasi and Shakkottai, Srinivas and Bharadia, Dinesh and Jain, Ish Kumar},
+  booktitle={2026 IEEE International Symposium on Spectrum Innovation (DySPAN)},
+  pages={1--8},
+  year={2026},
+  organization={IEEE}
 }
+```
