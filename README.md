@@ -100,3 +100,15 @@ Always remember a structured email will help us understand your issues quickly.
 # tinytwin-oai
 
 Look at the z_docs folder for documentation on building and running 
+
+## Citation
+
+If you use Tiny-Twin in your research, please cite our paper:
+
+```bibtex
+@inproceedings{mamaghani2026tinytwin,
+  title={Tiny-Twin: A CPU-Native Full-stack Digital Twin for NextG Cellular Networks},
+  author={Mamaghani, Ali and Ghosh, Ushasi and Jain, Ish Kumar and Rajagopalan, Vicram and Shakkottai, Srinivas and Bharadia, Dinesh},
+  booktitle={2026 IEEE International Symposium on Dynamic Spectrum Access Networks (DySPAN)},
+  year={2026}
+}
